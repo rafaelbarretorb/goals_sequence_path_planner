@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+
+<launch>
+    <!-- path server launch file -->
+    <node pkg="goals_sequence_path_planner" type="path_planning_server" name="seq_path_planner_server" output="screen">
+    </node>
+</launch>

@@ -1,0 +1,125 @@
+#!/usr/bin/env python
+
+from goals_sequence_path_planner.srv import *
+import rospy
+from tf.transformations import quaternion_from_euler
+from geometry_msgs.msg import Pose, Point, PoseArray
+from std_msgs.msg import Int16MultiArray
+import numpy as np
+import math
+
+from nav_msgs.msg import OccupancyGrid
+
+from tf.transformations import euler_from_quaternion
+
+from goals_sequence_path_planner import GlobalPathPlanner
+
+from goals_sequence_path_planner.msg import Paths
+
+class SeqGoalsPlannerServer:
+    def __init__(self):
+        self.global_costmap = None
+        rospy.Subscriber('/move_base/global_costmap/costmap', OccupancyGrid, self.global_costmap_cb)
+
+        
+        self.seq_goals_planner_service = rospy.Service("seq_of_goals_path_planner", SeqGoalsPathPlanner, self.planner_cb)
+
+
+
+    def planner_cb(self, req):
+
+
+        print ""
+        print "TEST 2"
+        print ""
+        rospy.loginfo("Request inputs: ")
+
+        # Initial Pose
+        x_initial = req.initial_pose.position.x
+        y_initial = req.initial_pose.position.y
+
+        euler_angles = euler_from_quaternion((req.initial_pose.orientation.x,
+                                             req.initial_pose.orientation.y,
+                                             req.initial_pose.orientation.z,
+                                             req.initial_pose.orientation.w))
+        yaw_initial = euler_angles[2]
+
+        rospy.loginfo("Initial Pose: ( x , y, yaw) = ( %f , %f , %f )" % (x_initial, y_initial, math.degrees(yaw_initial)))
+
+        # Final Pose
+        x_final = req.final_pose.position.x
+        y_final = req.final_pose.position.y
+
+        euler_angles = euler_from_quaternion((req.final_pose.orientation.x,
+                                             req.final_pose.orientation.y,
+                                             req.final_pose.orientation.z,
+                                             req.final_pose.orientation.w))
+        yaw_final = euler_angles[2]
+
+        rospy.loginfo("Final Pose: ( x , y, yaw) = ( %f , %f , %f )" % (x_final, y_final, math.degrees(yaw_final)))
+
+        # Goals List
+        rospy.loginfo("Number of goals: %d " % len(req.sequence_of_goals.poses))
+        rospy.loginfo("Goals Positions: ")
+
+        goals_list = []
+        for i in range(len(req.sequence_of_goals.poses)):
+            x = req.sequence_of_goals.poses[i].position.x
+            y = req.sequence_of_goals.poses[i].position.y
+
+            euler_angles = euler_from_quaternion((req.sequence_of_goals.poses[i].orientation.x,
+                                                  req.sequence_of_goals.poses[i].orientation.y,
+                                                  req.sequence_of_goals.poses[i].orientation.z,
+                                                  req.sequence_of_goals.poses[i].orientation.w))
+            yaw = euler_angles[2]
+            goals_list.append([x, y, yaw])
+
+            rospy.loginfo("Goal %d: ( x , y ) = ( %f , %f )" % (i+1, x, y))
+
+
+        start_pose = [x_initial, y_initial, yaw_initial] 
+        final_pose = [x_final, y_final, yaw_final]
+
+
+        planner = GlobalPathPlanner(start_pose=start_pose, global_map=self.global_costmap, final_pose=final_pose)
+        paths = planner.global_path_planner(goals_list)
+
+        result = Paths()
+
+        for path in paths:
+            p = PoseArray()
+            for i in range(len(path)):
+                p.poses.append(self.pose_2d_to_ros_pose(path[i]))
+
+            result.paths.append(p)
+
+        return result
+
+    def pose_2d_to_ros_pose(self, my_pose):
+        """ """
+
+        pose = Pose()
+        pose.position.x = my_pose[0]
+        pose.position.y = my_pose[1]
+        pose.position.z = 0.0
+
+        if len(my_pose) == 3:
+            quat = quaternion_from_euler(0.0, 0.0, my_pose[2])
+        else:
+            quat = quaternion_from_euler(0.0, 0.0, 0.0)
+
+        pose.orientation.x = quat[0]
+        pose.orientation.y = quat[1]
+        pose.orientation.z = quat[2]
+        pose.orientation.w = quat[3]
+
+        return pose
+
+    def global_costmap_cb(self, msg):
+        self.global_costmap = msg
+
+
+if __name__ == '__main__':
+    rospy.init_node('seq_path_planner_server')
+    SeqGoalsPlannerServer()
+    rospy.spin()
