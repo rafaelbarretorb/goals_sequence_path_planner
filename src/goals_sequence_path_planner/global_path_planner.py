@@ -4,15 +4,12 @@
 from scipy import interpolate
 
 from rrt_star import RRT_Star
-from orientation_filter import aim_to_next_position, get_arrows, get_arrow_pose, aim_to_point
-from helper_functions import dist
+from helper_functions import dist, aim_to_point
 
 import numpy as np
 import matplotlib.pyplot as plt
 import pylab
 import math
-
-from spline_tests import bspline
 
 PI = math.pi
 
@@ -141,47 +138,4 @@ class GlobalPathPlanner:
         else:
             return theta2, theta2
 
-    def make_paths_smoother(self, paths):
-        smoother_paths = list()
-        for i in range(len(paths)):
-            data = np.array(paths[i])
-            p = self.bspline(data,n=100,degree=3)
-            smoother_paths.append(p)
 
-        return smoother_paths
-
-    def bspline(self, cv, n=100, degree=3, periodic=False):
-        """ Calculate n samples on a bspline
-
-            cv :      Array ov control vertices
-            n  :      Number of samples to return
-            degree:   Curve degree
-            periodic: True - Curve is closed
-                    False - Curve is open
-        """
-        # If periodic, extend the point array by count+degree+1
-        cv = np.asarray(cv)
-        count = len(cv)
-
-        if periodic:
-            factor, fraction = divmod(count+degree+1, count)
-            cv = np.concatenate((cv,) * factor + (cv[:fraction],))
-            count = len(cv)
-            degree = np.clip(degree,1,degree)
-
-        # If opened, prevent degree from exceeding count-1
-        else:
-            degree = np.clip(degree,1,count-1)
-
-        # Calculate knot vector
-        kv = None
-        if periodic:
-            kv = np.arange(0-degree,count+degree+degree-1)
-        else:
-            kv = np.clip(np.arange(count+degree+1)-degree,0,count-degree)
-
-        # Calculate query range
-        u = np.linspace(periodic,(count-degree),n)
-
-        # Calculate result
-        return np.array(interpolate.splev(u, (kv,cv.T,degree))).T

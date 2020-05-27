@@ -1,19 +1,19 @@
 #!/usr/bin/env python
 
 from world import make_world
-from rrt_star import RRT_Star
-from orientation_filter import aim_to_next_position, get_arrows, get_arrow_pose
-
 
 import numpy as np
 import matplotlib.pyplot as plt
 import pylab
 import math
-from maneuver_bubble import Maneuver
 
-from spline_tests import bspline
+# from spline_tests import bspline
+from helper_visual_functions import bspline, get_arrow_pose
 
 from datetime import datetime
+
+from goals_sequence_path_planner.rrt_star import RRT_Star
+from goals_sequence_path_planner.maneuver_bubble import Maneuver
 
 now = datetime.now()
 PI = math.pi
@@ -36,7 +36,7 @@ path_x, path_y = rrt_star.path_planning()
 
 later = datetime.now()
 plt.plot(path_x[:], path_y[:])
-#plt.scatter(path_x, path_y)
+plt.scatter(path_x, path_y)
 
 ########################################################
 # goal_tolerance = 0.2
@@ -70,27 +70,28 @@ plt.plot(path_x[:], path_y[:])
 # plt.plot(x_goal_left, y_goal_left)
 # plt.plot(x_goal_arc, y_goal_arc)
 
-difference = (later - now).total_seconds()
-print difference
+# difference = (later - now).total_seconds()
+# print difference
 ########################################################
 ##### SPLINE #####
-data = list()
-for i in range(len(path_x)):
-  data.append([path_x[i], path_y[i]])
+# data = list()
+# for i in range(len(path_x)):
+#   data.append([path_x[i], path_y[i]])
 
-data = np.array(data)
-p = bspline(data,n=100,degree=3)
-x,y = p.T
-plt.plot(x,y)
+# data = np.array(data)
+# p = bspline(data,n=100,degree=3)
+# x,y = p.T
+# plt.plot(x,y)
 
 ########################################################
+# Plot Start Pose
+start_endx, start_endy = get_arrow_pose(start_pose[0], start_pose[1], start_pose[2], arrow_length=0.25)
+pylab.arrow(start_pose[0], start_pose[1], start_endx, start_endy, width=0.0075, color='red')
 
 # Plot Goal
-goal_endx, goal_endy = get_arrow_pose(goal_pose[0], goal_pose[1], goal_pose[2], arrow_length=0.5)
-pylab.arrow(goal_pose[0], goal_pose[1], goal_endx, goal_endy, width=0.01, color='black')
+goal_endx, goal_endy = get_arrow_pose(goal_pose[0], goal_pose[1], goal_pose[2], arrow_length=0.25)
+pylab.arrow(goal_pose[0], goal_pose[1], goal_endx, goal_endy, width=0.0075, color='black')
 
-# Plot Goal
-start_endx, start_endy = get_arrow_pose(start_pose[0], start_pose[1], start_pose[2], arrow_length=0.5)
-pylab.arrow(start_pose[0], start_pose[1], start_endx, start_endy, width=0.01, color='red')
+
 
 plt.show()

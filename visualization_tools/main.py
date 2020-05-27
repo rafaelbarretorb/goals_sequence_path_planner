@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
-from world import make_world
-from rrt_star import RRT_Star
-from orientation_filter import aim_to_next_position, get_arrows, get_arrow_pose
+
 
 
 import numpy as np
@@ -10,7 +8,13 @@ import matplotlib.pyplot as plt
 import pylab
 import math
 
+from goals_sequence_path_planner.global_path_planner import GlobalPathPlanner
+
+
 from global_path_planner import GlobalPathPlanner
+from world import make_world
+
+from orientation_filter import get_arrow_pose
 
 from datetime import datetime
 
