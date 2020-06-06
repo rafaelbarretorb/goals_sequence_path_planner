@@ -29,52 +29,55 @@ def make_world():
 
     ax = fig.add_subplot(1, 1, 1)
 
-    # Major ticks every 20, minor ticks every 5
-    major_ticks = np.arange(-SQUARE_DIM, SQUARE_DIM, 1)
-    minor_ticks = np.arange(-SQUARE_DIM, SQUARE_DIM, CELL_DIM)
+    # # Major ticks every 20, minor ticks every 5
+    # major_ticks = np.arange(-SQUARE_DIM, SQUARE_DIM, 1)
+    # minor_ticks = np.arange(-SQUARE_DIM, SQUARE_DIM, CELL_DIM)
 
-    ax.set_xticks(major_ticks)
-    ax.set_xticks(minor_ticks, minor=True)
-    ax.set_yticks(major_ticks)
-    ax.set_yticks(minor_ticks, minor=True)
+    # ax.set_xticks(major_ticks)
+    # ax.set_xticks(minor_ticks, minor=True)
+    # ax.set_yticks(major_ticks)
+    # ax.set_yticks(minor_ticks, minor=True)
 
-    # And a corresponding grid
-    ax.grid(which='both')
+    # # And a corresponding grid
+    # ax.grid(which='both')
 
-    # Or if you want different settings for the grids:
-    ax.grid(which='minor', alpha=0.2)
-    ax.grid(which='major', alpha=0.5)
+    # # Or if you want different settings for the grids:
+    # ax.grid(which='minor', alpha=0.2)
+    # ax.grid(which='major', alpha=0.5)
 
 
     # obstacles
-    for row in range(5,10):
-        for column in range(3,8):
+
+    # GOAL 1
+    for row in range(0, 5):
+        for column in range(5, 10):
             grid[row][column] = 1
 
-    for row in range(15,20):
-        for column in range(40,45):
+    # GOAL 2
+    for row in range(20, 25):
+        for column in range(45, 50):
             grid[row][column] = 1
 
-    for row in range(45,50):
-        for column in range(45,50):
+    # GOAL 3
+    for row in range(40, 45):
+        for column in range(45, 50):
             grid[row][column] = 1
 
-
-    for row in range(0,5):
-        for column in range(15,18):
+    # GOAL 4
+    for row in range(0, 5):
+        for column in range(20, 25):
             grid[row][column] = 1
 
-    for row in range(5,10):
-        for column in range(15,18):
+    # Wall 1
+    for row in range(0, 20):
+        for column in range(18, 21):
             grid[row][column] = 1
 
-    for row in range(5,15):
-        for column in range(15,18):
+    # Wall 2
+    for row in range(0, 20):
+        for column in range(24, 27):
             grid[row][column] = 1
 
-    for row in range(15,20):
-        for column in range(15,18):
-            grid[row][column] = 1
 
     #for row in range(25,30):
         #for column in range(35,37):
@@ -101,6 +104,7 @@ def make_world():
     #currentAxis.add_patch(Rectangle(( 0.0, -5.0), 1.0, 10, alpha=0.8, facecolor='red'))
 
     return grid, fig
+
 
 if __name__ == '__main__':
     make_world()

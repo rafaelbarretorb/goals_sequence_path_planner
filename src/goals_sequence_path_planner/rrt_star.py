@@ -137,7 +137,6 @@ class RRT_Star:
             x_node = self.nodes[0][int(node_id)]
             y_node = self.nodes[1][int(node_id)]
 
-
             cost_curr_parent = self.nodes[2][curr_parent_id]
             x_curr_parent = self.nodes[0][curr_parent_id]
             y_curr_parent = self.nodes[1][curr_parent_id]
@@ -260,14 +259,17 @@ class RRT_Star:
 
         sys.exit("ERROR MESSAGE: Samples in free space fail after 1000 attempts!!!")
 
-    # get the cell coord of the center point of the robot
     def world_to_map(self, x, y):
-        #cell_column = int((x - self.MAP.info.origin.position.x) / self.MAP.info.resolution)
-        #cell_row = int((y - self.MAP.info.origin.position.y) / self.MAP.info.resolution)
-        #column*CELL_DIM - SQUARE_DIM, SQUARE_DIM - CELL_DIM*(row + 1))
-        cell_column = int((x - (-5.0)) / 0.2)
-        cell_row = int((-y - (-5.0)) / 0.2) 
-        return cell_row, cell_column
+        """ get the cell coord of the center point of the robot"""
+        if type(self.grid) == np.ndarray:
+            cell_col = int((x - (-5.0)) / 0.2)
+            cell_row = int((-y - (-5.0)) / 0.2) 
+        else:
+            # ROS nav_msgs/OccupancyGrid Message
+            cell_col = int(round((x - self.grid.info.origin.position.x) / self.grid.info.resolution))
+            cell_row = int(round((y - self.grid.info.origin.position.y) / self.grid.info.resolution))
+
+        return cell_row, cell_col
 
     def point_circle_collision(self, new_node_id, goal_point, radius):
         new_node_id = int(new_node_id)
@@ -286,41 +288,62 @@ class RRT_Star:
             return p1[0] + self.epsilon_max*math.cos(theta), p1[1] + self.epsilon_max*math.sin(theta)
 
     def collision(self, p):  # check if point collides with the obstacle
-        """ ."""
-        cell_row, cell_column = self.world_to_map(p[0], p[1])
+        """ Check if the point p is located in a occupied cell."""
+        cell_row, cell_col = self.world_to_map(p[0], p[1])
 
-        if cell_column < 0:
-            return True
-        elif cell_row < 0:
-            return True
-        elif cell_row - 1 < 0:
-            return True
-        elif cell_column -1 < 0:
-            return True
-        elif cell_column >= self.grid.shape[1]:
-            return True
-        elif cell_row >= self.grid.shape[0]:
-            return True
-        elif cell_column+1 >= self.grid.shape[1]:
-            return True
-        elif cell_row +1>= self.grid.shape[0]:
-            return True
-        elif self.grid[cell_row][cell_column] == 1:
-            return True
-        elif self.grid[cell_row+1][cell_column+1] == 1:
-            return True
-        elif self.grid[cell_row][cell_column+1] == 1:
-            return True
-        elif self.grid[cell_row+1][cell_column] == 1:
-            return True
-        elif self.grid[cell_row-1][cell_column] == 1:
-            return True
-        elif self.grid[cell_row][cell_column-1] == 1:
-            return True
-        elif self.grid[cell_row-1][cell_column-1] == 1:
-            return True
+        if type(self.grid) == np.ndarray:
+            if cell_col < 0:
+                return True
+            elif cell_row < 0:
+                return True
+            elif cell_row - 1 < 0:
+                return True
+            elif cell_col - 1 < 0:
+                return True
+            elif cell_col >= self.grid.shape[1]:
+                return True
+            elif cell_row >= self.grid.shape[0]:
+                return True
+            elif cell_col + 1 >= self.grid.shape[1]:
+                return True
+            elif cell_row +1>= self.grid.shape[0]:
+                return True
+            elif self.grid[cell_row][cell_col] == 1:
+                return True
+            elif self.grid[cell_row+1][cell_col+1] == 1:
+                return True
+            elif self.grid[cell_row][cell_col+1] == 1:
+                return True
+            elif self.grid[cell_row+1][cell_col] == 1:
+                return True
+            elif self.grid[cell_row-1][cell_col] == 1:
+                return True
+            elif self.grid[cell_row][cell_col-1] == 1:
+                return True
+            elif self.grid[cell_row-1][cell_col-1] == 1:
+                return True
+            else:
+                return False
         else:
-            return False
+            # ROS nav_msgs/OccupancyGrid Message
+            index = cell_col + self.grid.info.width*cell_row
+
+            if cell_col < 0:
+                return True
+            elif cell_row < 0:
+                return True
+            elif cell_row - 1 < 0:
+                return True
+            elif cell_col -1 < 0:
+                return True
+            elif cell_col >= self.grid.info.width:
+                return True
+            elif cell_row >= self.grid.info.height:
+                return True
+            elif self.grid.data[index] > 1:
+                return True
+            else:
+                return False
 
     def step_from_to2(self, p1, p2, n):
 

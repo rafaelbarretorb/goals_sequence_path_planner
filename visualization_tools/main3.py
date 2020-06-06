@@ -141,17 +141,17 @@ for i in range(len(opt_paths)):
 
 
 
-grid_map, graph = make_world()
-smoother_paths = planner.make_paths_smoother(opt_paths)
+# grid_map, graph = make_world()
+# smoother_paths = planner.make_paths_smoother(opt_paths)
 
-for i in range(len(smoother_paths)):
-	x, y = smoother_paths[i].T
-	plt.plot(x,y, color=colors[i])
+# for i in range(len(smoother_paths)):
+# 	x, y = smoother_paths[i].T
+# 	plt.plot(x,y, color=colors[i])
 
-start_endx, start_endy = get_arrow_pose(start_pose[0], start_pose[1], start_pose[2], arrow_length=0.3)
-pylab.arrow(start_pose[0], start_pose[1], start_endx, start_endy, width=0.0075, color='red')
+# start_endx, start_endy = get_arrow_pose(start_pose[0], start_pose[1], start_pose[2], arrow_length=0.3)
+# pylab.arrow(start_pose[0], start_pose[1], start_endx, start_endy, width=0.0075, color='red')
 
-endx, endy = get_arrow_pose(x[-1], y[-1], final_pose[2], arrow_length=0.3)
-pylab.arrow(x[-1], y[-1], endx, endy, width=0.0075, color='green')
+# endx, endy = get_arrow_pose(x[-1], y[-1], final_pose[2], arrow_length=0.3)
+# pylab.arrow(x[-1], y[-1], endx, endy, width=0.0075, color='green')
 
 plt.show()
