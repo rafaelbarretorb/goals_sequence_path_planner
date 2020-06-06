@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-# global_path_planner.py
 from scipy import interpolate
 
 from rrt_star import RRT_Star
@@ -17,8 +16,6 @@ class GlobalPathPlanner:
     """
     """
 
-    # TODO
-    # - Risk Zones?
     def __init__(self, start_pose, global_map, final_pose):
 
         self.start_pose = start_pose
@@ -137,5 +134,3 @@ class GlobalPathPlanner:
             return (theta1 - dist), theta2
         else:
             return theta2, theta2
-
-

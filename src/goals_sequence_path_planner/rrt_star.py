@@ -31,9 +31,11 @@ class RRT_Star:
         self.radius = 2.0
 
         if self.collision(start_point):
+            print start_point
             sys.exit("ERROR!!!!. Start Position is not allowed.")
 
         if self.collision(goal_point):
+            print goal_point
             sys.exit("ERROR!!!!. Goal Position is not allowed.")
 
         if self.maneuvers:

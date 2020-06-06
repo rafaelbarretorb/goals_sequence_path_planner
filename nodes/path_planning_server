@@ -14,7 +14,7 @@ from tf.transformations import euler_from_quaternion
 
 from goals_sequence_path_planner import GlobalPathPlanner
 
-from goals_sequence_path_planner.msg import Paths
+from goals_sequence_path_planner.msg import PathArray
 
 class SeqGoalsPlannerServer:
     def __init__(self):
@@ -84,7 +84,7 @@ class SeqGoalsPlannerServer:
         planner = GlobalPathPlanner(start_pose=start_pose, global_map=self.global_costmap, final_pose=final_pose)
         paths = planner.global_path_planner(goals_list)
 
-        result = Paths()
+        result = PathArray()
 
         for path in paths:
             p = PoseArray()

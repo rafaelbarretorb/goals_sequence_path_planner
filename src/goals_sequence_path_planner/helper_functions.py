@@ -31,9 +31,6 @@ def aim_to_point(current_x, current_y, target_x, target_y):
     x2 = target_x
     x1 = current_x
 
-    if abs(x2 - x1) > 0.01:
-        yaw = math.atan2((y2 - y1), (x2 - x1)) # method returns a numeric value between -PI and PI
-        yaw = PI/2
+    yaw = math.atan2((y2 - y1), (x2 - x1)) # method returns a numeric value between -PI and PI
 
     return yaw
-

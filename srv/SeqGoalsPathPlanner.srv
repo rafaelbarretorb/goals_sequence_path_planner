@@ -2,4 +2,4 @@ geometry_msgs/Pose initial_pose
 geometry_msgs/PoseArray sequence_of_goals
 geometry_msgs/Pose final_pose
 ---
-Paths paths
+PathArray paths

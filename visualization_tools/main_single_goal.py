@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 import pylab
 import math
 
-# from spline_tests import bspline
 from helper_visual_functions import bspline, get_arrow_pose
 
 from datetime import datetime
