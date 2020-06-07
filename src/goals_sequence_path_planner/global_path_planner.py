@@ -115,7 +115,7 @@ class GlobalPathPlanner:
                 
                 # TODO Limit time (max 10 secs example) 
                 rrt_star = RRT_Star(start_point=points[i], goal_point=points[i+1], grid=self.global_map,
-                    max_num_nodes=10000,
+                    max_num_nodes=7000,
                     epsilon_min=0.1,
                     epsilon_max=0.5, obs_resolution=0.1, maneuvers=True)
 
@@ -141,35 +141,39 @@ class GlobalPathPlanner:
 
     def departure_angle(self, first_x, first_y, second_x, second_y):
         """ return the start angle"""
-        return aim_to_point(first_x, first_y, second_x, second_y)
+        theta = aim_to_point(first_x, first_y, second_x, second_y)
+        print "DOD = " + str(math.degrees(theta))
+        return theta
     
     def arrival_angle(self, last_but_one_x, last_but_one_y, last_x, last_y):
         """ return the final angle of the last pose of the path"""
-        return aim_to_point(last_but_one_x, last_but_one_y, last_x, last_y)
+        theta = aim_to_point(last_but_one_x, last_but_one_y, last_x, last_y)
+        print "DOA = " + str(math.degrees(theta))
+        return theta
                
-    def angle_distance(self, x, y): 
-        """."""
-        if x < 0:
-            x = x + 2*PI
-        
-        if y < 0:
-            y = y + 2*PI
-        
-        a = x - y
-        # if a > PI:
-        #     a = a - 2*PI
-        
-        # if a < -PI:
-        #     a = a + 2*PI 
+    def angle_distance(self, theta, phi):
+        """ ."""
+        if theta < 0:
+            while theta < 0:
+                theta = theta + 2*PI
 
-        a = (a + PI) % (2*PI) - PI
+        if phi < 0:
+            while phi < 0:
+                phi = phi + 2*PI
 
-        #return min(y-x, y-x+2*PI, y-x-2*PI)
-        return a
+        diff = theta - phi
+
+        diff = (diff + PI) % (2*PI) - PI
+
+        return abs(diff)
 
     def get_goal_orientation(self, path1, path2):
         """."""
         doa = self.arrival_angle(path1[-2][0], path1[-2][1], path1[-1][0], path1[-1][1]) 
+
+        # DOD
+        print "DOD" + str((path2[0][0], path2[0][1])) + " --> " + str((path2[1][0], path2[1][1]))
+        print path2
         dod = self.departure_angle(path2[0][0], path2[0][1], path2[1][0], path2[1][1])
         #dist = self.angle_distance(theta1, theta2)
 
@@ -178,14 +182,14 @@ class GlobalPathPlanner:
     def get_best_angle(self, dod_angles, goals_angles):
 
         for i in range(len(dod_angles)):
-            # print ""
-            # print "DOD: " + str(math.degrees(dod_angles[i]))
-            # print "Goal Angle: " + str(math.degrees(goals_angles[i]))
-            # print "Distance 1: " + str(abs(math.degrees(self.angle_distance(dod_angles[i], goals_angles[i]))))
-            # print "Distance 2: " + str(abs(math.degrees(self.angle_distance(dod_angles[i], goals_angles[i] - PI))))
-            # print ""
+            print ""
+            print "DOD: " + str(math.degrees(dod_angles[i]))
+            print "Goal Angle: " + str(math.degrees(goals_angles[i]))
+            print "Distance 1: " + str(math.degrees(self.angle_distance(dod_angles[i], goals_angles[i])))
+            print "Distance 2: " + str(math.degrees(self.angle_distance(dod_angles[i], goals_angles[i] + PI)))
+            print ""
             if goals_angles[i] != None:
-                if abs(self.angle_distance(dod_angles[i], goals_angles[i])) > abs(self.angle_distance(dod_angles[i], goals_angles[i] - PI)):
-                    goals_angles[i] = goals_angles[i] - PI
+                if self.angle_distance(dod_angles[i], goals_angles[i]) > self.angle_distance(dod_angles[i], goals_angles[i] - PI):
+                    goals_angles[i] = goals_angles[i] + PI
 
         return goals_angles

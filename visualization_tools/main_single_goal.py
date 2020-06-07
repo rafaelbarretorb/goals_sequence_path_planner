@@ -23,8 +23,8 @@ PI = math.pi
 r = 2.0
 scatter_area = PI*r*r
 
-start_pose = [-4.0, 2.5, PI]
-goal_pose = [4.5, 1.5, -PI/2]
+start_pose = [-4.0, 2.5, -PI/4]
+goal_pose = [3.5, 0.5, -PI/2]
 
 # FIGURE 1
 grid_map, graph = make_world()

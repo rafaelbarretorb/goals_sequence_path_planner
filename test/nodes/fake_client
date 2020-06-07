@@ -27,10 +27,11 @@ class FakeClient():
 		G4 = [-1.5, -3.5, PI, True]
 
 		# TEST 1
-		goals_list = [G1, G2, G3, G4]
-		# goals_list = [G2]
+		#goals_list = [G1, G2, G3, G4]
+		goals_list = [G2]
 		start_pose = [0, 0, PI, True]
 		final_pose = [0, 0, -PI, True]
+
 
 		# Service Request
 		rospy.wait_for_service('seq_of_goals_path_planner')

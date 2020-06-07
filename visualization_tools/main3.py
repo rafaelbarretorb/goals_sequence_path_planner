@@ -16,19 +16,23 @@ from helper_visual_functions import bspline, get_arrow_pose
 PI = math.pi
 
 G1 = [-3.0, 3.0, PI, True]
-G2 = [-0.5, 3.0, 0, False]
-G3 = [3.0, 0.5, PI/2, True]
-G4 = [3.0, -3.5, PI/2, True]
+G2 = [-0.5, 3.5, 0, False]
+G3 = [3.5, 0.5, PI/2, True]
+G4 = [3.5, -3.5, PI/2, True]
 
 # TEST 1
-goals_list = [G1, G3, G4]
-start_pose = [-3.5, -4.0, PI/2, True]
-final_pose = [-2.5, -4.0, -PI/2, True]
+# goals_list = [G1, G3, G4]
+# start_pose = [-3.5, -4.0, PI/2, True]
+# final_pose = [-2.5, -4.0, -PI/2, True]
+
+# goals_list = [G3]
+# start_pose = G1
+# final_pose = G4
 
 # # TEST 2
-# goals_list = [G1, G3, G4, G3]
-# start_pose = [-3.5, -2.0, PI/2, False]
-# final_pose = [-2.5, -2.0, -PI/2, False]
+goals_list = [G1, G3, G4, G3]
+start_pose = [-3.5, -2.0, PI/2, False]
+final_pose = [-2.5, -2.0, -PI/2, False]
 
 # # TEST 3
 # goals_list = [G3, G4, G3]
@@ -90,18 +94,18 @@ for i in range(len(paths)):
 		x.append(paths[i][j][0])
 		y.append(paths[i][j][1])
 	plt.plot(x,y, color=colors[i])
-	#plt.scatter(x,y, color=colors[i])
+	plt.scatter(x,y, color=colors[i])
 
 	# DOD
 	# endx, endy = get_arrow_pose(paths[i][-1][0], paths[i][-1][1], goals_list[i][2], arrow_length=0.3)
 	# pylab.arrow(paths[i][-1][0], paths[i][-1][1], endx, endy, width=0.0075, color='black')
 
-#   # Arrival Angles
-#   endx, endy = get_arrow_pose(paths[i][-1][0], paths[i][-1][1], goals_list3[i][2], arrow_length=0.3)
-#   pylab.arrow(paths[i][-1][0], paths[i][-1][1], endx, endy, width=0.0075, color='green')
+  # Arrival Angles
+  # endx, endy = get_arrow_pose(paths[i][-1][0], paths[i][-1][1], goals_list3[i][2], arrow_length=0.3)
+  # pylab.arrow(paths[i][-1][0], paths[i][-1][1], endx, endy, width=0.0075, color='green')
 
-#   # endx, endy = get_arrow_pose(paths[i][-1][0], paths[i][-1][1], goals_list2[i][2], arrow_length=0.3)
-#   # pylab.arrow(paths[i][-1][0], paths[i][-1][1], endx, endy, width=0.0075, color='green')
+  # endx, endy = get_arrow_pose(paths[i][-1][0], paths[i][-1][1], goals_list2[i][2], arrow_length=0.3)
+  # pylab.arrow(paths[i][-1][0], paths[i][-1][1], endx, endy, width=0.0075, color='green')
 
 start_endx, start_endy = get_arrow_pose(start_pose[0], start_pose[1], start_pose[2], arrow_length=0.3)
 pylab.arrow(start_pose[0], start_pose[1], start_endx, start_endy, width=0.0075, color='red')

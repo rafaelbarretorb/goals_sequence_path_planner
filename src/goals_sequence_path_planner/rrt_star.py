@@ -219,12 +219,8 @@ class RRT_Star:
                     path_x.insert(0, self.nodes[0][curr_node_id])
                     path_y.insert(0, self.nodes[1][curr_node_id])
 
-                    # curr_node_id = parent_id
-                    curr_node_id = int(self.nodes[4][curr_node_id])
-
-                # Add the start point
-                path_x.insert(0, self.start_point[0])
-                path_y.insert(0, self.start_point[1])              
+                    parent_id = int(self.nodes[4][curr_node_id])
+                    curr_node_id = parent_id          
                 
                 print "Nodes Amount: " + str(int(new_goal_node_id))
                 #print self.nodes[:, 0:4]
