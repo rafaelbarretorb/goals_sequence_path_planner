@@ -242,7 +242,7 @@ class RRT_Star:
 
         """
         for i in range(10000):
-            x_rand = (random.random() - 0.5)*10, (random.random() - 0.5)*10
+            x_rand = (random.random() - 0.5)*16, (random.random() - 0.5)*16
             if not self.collision(x_rand) and self.make_maneuver(x_rand[0], x_rand[1]):
                 return x_rand
 

@@ -49,17 +49,17 @@ class SeqGoalsPlannerServer:
                      i, goals_list[i][0], goals_list[i][1], math.degrees(goals_list[i][2])))
 
 
-        # planner = GlobalPathPlanner(start_pose=start_pose, global_map=self.global_costmap, final_pose=final_pose)
-        # paths = planner.global_path_planner(goals_list)
+        planner = GlobalPathPlanner(start_pose=start_pose, global_map=self.global_costmap, final_pose=final_pose)
+        paths = planner.global_path_planner(goals_list)
 
         result = PathArray()
 
-        # for path in paths:
-        #     p = PoseArray()
-        #     for i in range(len(path)):
-        #         p.poses.append(self.pose_2d_to_ros_pose(path[i]))
+        for path in paths:
+            p = PoseArray()
+            for i in range(len(path)):
+                p.poses.append(self.pose_2d_to_ros_pose(path[i]))
 
-        #     result.paths.append(p)
+            result.paths.append(p)
 
         return result
 

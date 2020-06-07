@@ -10,6 +10,8 @@ import matplotlib.pyplot as plt
 import pylab
 import math
 
+import copy
+
 PI = math.pi
 
 class GlobalPathPlanner:
