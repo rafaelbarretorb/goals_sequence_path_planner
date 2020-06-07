@@ -16,14 +16,14 @@ from helper_visual_functions import bspline, get_arrow_pose
 PI = math.pi
 
 G1 = [-3.0, 3.0, PI, True]
-G2 = [-0.5, 3.0, None, True]
+G2 = [-0.5, 3.0, 0, False]
 G3 = [3.0, 0.5, PI/2, True]
 G4 = [3.0, -3.5, PI/2, True]
 
 # TEST 1
 goals_list = [G1, G3, G4]
-start_pose = [-3.5, -4.0, PI/2, False]
-final_pose = [-2.5, -4.0, -PI/2, False]
+start_pose = [-3.5, -4.0, PI/2, True]
+final_pose = [-2.5, -4.0, -PI/2, True]
 
 # # TEST 2
 # goals_list = [G1, G3, G4, G3]
@@ -35,7 +35,7 @@ final_pose = [-2.5, -4.0, -PI/2, False]
 # start_pose = [-3.5, -2.0, PI/2, False]
 # final_pose = [-2.5, -2.0, -PI/2, False]
 
-# goals_list = [G1, G2, G3, G4]
+# goals_list = [G2]
 # start_pose = [-3.5, -4.0, PI/2, False]
 # final_pose = [-2.5, -4.0, -PI/2, False]
 

@@ -7,7 +7,6 @@ import numpy as np
 from maneuver_bubble import Maneuver
 
 import sys
-import time
 
 
 class RRT_Star:
@@ -178,17 +177,7 @@ class RRT_Star:
                     self.nodes[2][int(node_id)] = cost_new_node + self.dist(x_node, y_node, x_new_node, y_new_node)
 
     def path_planning(self):
-        """ RRT* (RRT Star) Path Planning
-
-        Args:
-        param1
-        param2
-        p2: Poinf 2 tuple.
-
-        Returns:
-        Th
-
-        """
+        """ Execute the planning."""
 
         # First node
         initial_node = self.make_node(self.start_point[0], self.start_point[1], -1)
@@ -214,8 +203,8 @@ class RRT_Star:
                     self.rewire(new_node_id)            
                     foundNext = True
 
-            # check if the distance between the goal node and the new node is less than the GOAL_RADIUS
-            if self.point_circle_collision(int(new_node_id), self.goal_point, self.goal_tolerance):# and self.nodes.shape[1] > 100:
+            # check if the distance between the goal node and the new node is less than the goal radius
+            if self.is_goal_reached(int(new_node_id), self.goal_point, self.goal_tolerance) and self.nodes.shape[1] > 1000:
                 path_x = list()
                 path_y = list()
 
@@ -271,7 +260,8 @@ class RRT_Star:
 
         return cell_row, cell_col
 
-    def point_circle_collision(self, new_node_id, goal_point, radius):
+    def is_goal_reached(self, new_node_id, goal_point, radius):
+        """ ."""
         new_node_id = int(new_node_id)
         distance = self.dist(self.nodes[0][new_node_id], self.nodes[1][new_node_id], goal_point[0], goal_point[1])
         if (distance <= radius):
@@ -346,12 +336,14 @@ class RRT_Star:
                 return False
 
     def step_from_to2(self, p1, p2, n):
-
+        # TODO Rename this method
+        """ ."""
         theta = math.atan2(p2[1]-p1[1], p2[0]-p1[0])
         return (p1[0] + n*self.obs_resolution*math.cos(theta),
                 p1[1] + n*self.obs_resolution*math.sin(theta))
 
     def obstacle_free(self, point1, point2):
+        """ ."""
         distance = self.dist(point1[0], point1[1], point2[0], point2[1])
         n = 1
         if distance < self.obs_resolution:

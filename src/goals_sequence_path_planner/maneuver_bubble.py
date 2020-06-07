@@ -19,11 +19,20 @@ class Maneuver:
     self.maneuver_radius = maneuver_radius
     self.pose_status_goal = pose_status_goal
 
-    self.xc_left, self.yc_left = self.local_to_world_tf(0.0, self.goal_tolerance+self.maneuver_radius)
-    self.xc_right, self.yc_right = self.local_to_world_tf(0.0, -(self.goal_tolerance+self.maneuver_radius)) 
+    self.no_maneuver = False
+
+    if self.yaw != None:
+      self.xc_left, self.yc_left = self.local_to_world_tf(0.0, self.goal_tolerance+self.maneuver_radius)
+      self.xc_right, self.yc_right = self.local_to_world_tf(0.0, -(self.goal_tolerance+self.maneuver_radius))
+    else:
+      self.no_maneuver = True
+
+
+    # self.xc_front, self.yc_front = self.local_to_world_tf(0.0, -(self.goal_tolerance+self.maneuver_radius))
 
     # Arc Radius TODO
     self.arc_radius = 0.4
+
   
   def local_to_world_tf(self, x_, y_): 
     x = x_*np.cos(self.yaw) - y_*np.sin(self.yaw) + self.x0
@@ -39,7 +48,10 @@ class Maneuver:
     return x_, y_
 
   def is_this_point_allowed(self, px, py):
-    
+  
+    if self.no_maneuver == True:
+      return True
+
     # Left Circle
     A = not self.isThePointInsideOfTheCircle(px, py, self.xc_left, self.yc_left, self.maneuver_radius)
     

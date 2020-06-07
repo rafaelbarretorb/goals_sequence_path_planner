@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+
+<launch>
+    <!-- fake client launch file -->
+    <node pkg="goals_sequence_path_planner" type="fake_client" name="test_path_planning"  output="screen">
+    </node>
+</launch>

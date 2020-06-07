@@ -104,12 +104,14 @@ class GlobalPathPlanner:
 
         # Compute all optimized paths
         for i in range(len(points) - 1):
-            if points[i][2] == 10000:
+            # Do not attempt optimize
+            if points[i][2] == False:
                 optimal_paths.append([])
             else:
 
                 path = list()
-
+                
+                # TODO Limit time (max 10 secs example) 
                 rrt_star = RRT_Star(start_point=points[i], goal_point=points[i+1], grid=self.global_map,
                     max_num_nodes=10000,
                     epsilon_min=0.1,

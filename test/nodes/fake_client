@@ -1,0 +1,60 @@
+#!/usr/bin/env python
+
+import rospy
+
+import math
+
+PI = math.pi
+
+from goals_sequence_path_planner.srv import SeqGoalsPathPlanner
+from goals_sequence_path_planner.srv import SeqGoalsPathPlannerRequest
+from goals_sequence_path_planner.msg import Node, NodeArray, PathArray
+
+
+class FakeClient():
+    def __init__(self):
+		# Goals
+		G1 = [-3.0, 3.0, PI, True]
+		G2 = [-0.5, 3.0, None, True]
+		G3 = [3.0, 0.5, PI/2, True]
+		G4 = [3.0, -3.5, PI/2, True]
+
+		# TEST 1
+		goals_list = [G1, G3, G4]
+		start_pose = [-3.5, -4.0, PI/2, True]
+		final_pose = [-2.5, -4.0, -PI/2, True]
+
+		# Service Request
+		rospy.wait_for_service('seq_of_goals_path_planner')
+		response = rospy.ServiceProxy('seq_of_goals_path_planner', SeqGoalsPathPlanner)
+
+		request = SeqGoalsPathPlannerRequest()
+
+		request.start_point = Node()
+		request.start_point.x.data = start_pose[0]
+		request.start_point.y.data = start_pose[1]
+		request.start_point.yaw.data = start_pose[2]
+		request.start_point.optimize.data = start_pose[3]
+
+		request.final_point = Node()
+		request.final_point.x.data = final_pose[0]
+		request.final_point.y.data = final_pose[1]
+		request.final_point.yaw.data = final_pose[2]
+		request.final_point.optimize.data = final_pose[3]
+
+		request.sequence_of_goals = NodeArray()
+		for goal in goals_list:
+			node = Node()
+			node.x.data = goal[0]
+			node.y.data = goal[1]
+			node.yaw.data = goal[2]
+			node.optimize.data = goal[3]
+
+			request.sequence_of_goals.nodes.append(node)
+
+		result = response(request)
+
+if __name__ == '__main__':
+    rospy.init_node('test_path_planning')
+    FakeClient()
+    rospy.spin()

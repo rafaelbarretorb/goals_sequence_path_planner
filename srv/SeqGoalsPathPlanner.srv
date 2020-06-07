@@ -1,5 +1,5 @@
-geometry_msgs/Pose initial_pose
-geometry_msgs/PoseArray sequence_of_goals
-geometry_msgs/Pose final_pose
+Node start_point
+NodeArray sequence_of_goals
+Node final_point
 ---
 PathArray paths

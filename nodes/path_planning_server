@@ -14,7 +14,7 @@ from tf.transformations import euler_from_quaternion
 
 from goals_sequence_path_planner import GlobalPathPlanner
 
-from goals_sequence_path_planner.msg import PathArray
+from goals_sequence_path_planner.msg import PathArray, Node
 
 class SeqGoalsPlannerServer:
     def __init__(self):
@@ -27,71 +27,39 @@ class SeqGoalsPlannerServer:
 
 
     def planner_cb(self, req):
+        start_pose = [req.start_point.x.data, req.start_point.y.data, req.start_point.yaw.data]
+        rospy.loginfo(
+            "Start Pose: ( x , y, yaw) = ( %f , %f , %f )" % (
+                start_pose[0], start_pose[1], math.degrees(start_pose[2])))
+    
+        final_pose = [req.final_point.x.data, req.final_point.y.data, req.final_point.yaw.data]
+        rospy.loginfo(
+            "Final Pose: ( x , y, yaw) = ( %f , %f , %f )" % (
+                final_pose[0], final_pose[1], math.degrees(final_pose[2])))
+
+        rospy.loginfo("Goal Points: ")
+        goals_list = list()
+        for i in range(len(req.sequence_of_goals.nodes)):
+            goals_list.append([req.sequence_of_goals.nodes[i].x.data,
+                               req.sequence_of_goals.nodes[i].y.data,
+                               req.sequence_of_goals.nodes[i].yaw.data])
+
+            rospy.loginfo(
+                 "Goal %d: ( x , y, yaw) = ( %f , %f , %f )" % (
+                     i, goals_list[i][0], goals_list[i][1], math.degrees(goals_list[i][2])))
 
 
-        print ""
-        print "TEST 2"
-        print ""
-        rospy.loginfo("Request inputs: ")
-
-        # Initial Pose
-        x_initial = req.initial_pose.position.x
-        y_initial = req.initial_pose.position.y
-
-        euler_angles = euler_from_quaternion((req.initial_pose.orientation.x,
-                                             req.initial_pose.orientation.y,
-                                             req.initial_pose.orientation.z,
-                                             req.initial_pose.orientation.w))
-        yaw_initial = euler_angles[2]
-
-        rospy.loginfo("Initial Pose: ( x , y, yaw) = ( %f , %f , %f )" % (x_initial, y_initial, math.degrees(yaw_initial)))
-
-        # Final Pose
-        x_final = req.final_pose.position.x
-        y_final = req.final_pose.position.y
-
-        euler_angles = euler_from_quaternion((req.final_pose.orientation.x,
-                                             req.final_pose.orientation.y,
-                                             req.final_pose.orientation.z,
-                                             req.final_pose.orientation.w))
-        yaw_final = euler_angles[2]
-
-        rospy.loginfo("Final Pose: ( x , y, yaw) = ( %f , %f , %f )" % (x_final, y_final, math.degrees(yaw_final)))
-
-        # Goals List
-        rospy.loginfo("Number of goals: %d " % len(req.sequence_of_goals.poses))
-        rospy.loginfo("Goals Positions: ")
-
-        goals_list = []
-        for i in range(len(req.sequence_of_goals.poses)):
-            x = req.sequence_of_goals.poses[i].position.x
-            y = req.sequence_of_goals.poses[i].position.y
-
-            euler_angles = euler_from_quaternion((req.sequence_of_goals.poses[i].orientation.x,
-                                                  req.sequence_of_goals.poses[i].orientation.y,
-                                                  req.sequence_of_goals.poses[i].orientation.z,
-                                                  req.sequence_of_goals.poses[i].orientation.w))
-            yaw = euler_angles[2]
-            goals_list.append([x, y, yaw])
-
-            rospy.loginfo("Goal %d: ( x , y ) = ( %f , %f )" % (i+1, x, y))
-
-
-        start_pose = [x_initial, y_initial, yaw_initial] 
-        final_pose = [x_final, y_final, yaw_final]
-
-
-        planner = GlobalPathPlanner(start_pose=start_pose, global_map=self.global_costmap, final_pose=final_pose)
-        paths = planner.global_path_planner(goals_list)
+        # planner = GlobalPathPlanner(start_pose=start_pose, global_map=self.global_costmap, final_pose=final_pose)
+        # paths = planner.global_path_planner(goals_list)
 
         result = PathArray()
 
-        for path in paths:
-            p = PoseArray()
-            for i in range(len(path)):
-                p.poses.append(self.pose_2d_to_ros_pose(path[i]))
+        # for path in paths:
+        #     p = PoseArray()
+        #     for i in range(len(path)):
+        #         p.poses.append(self.pose_2d_to_ros_pose(path[i]))
 
-            result.paths.append(p)
+        #     result.paths.append(p)
 
         return result
 

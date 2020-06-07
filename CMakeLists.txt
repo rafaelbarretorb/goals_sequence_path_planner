@@ -10,8 +10,8 @@ project(goals_sequence_path_planner)
 find_package(catkin REQUIRED COMPONENTS
   rospy
   geometry_msgs
+  std_msgs
   message_generation
-
 )
 
 ## System dependencies are found with CMake's conventions
@@ -51,6 +51,8 @@ catkin_python_setup()
 add_message_files( DIRECTORY msg
   FILES
   PathArray.msg
+  Node.msg
+  NodeArray.msg
 )
 
 ## Generate services in the 'srv' folder
