@@ -21,10 +21,7 @@ class SeqGoalsPlannerServer:
         self.global_costmap = None
         rospy.Subscriber('/move_base/global_costmap/costmap', OccupancyGrid, self.global_costmap_cb)
 
-        
         self.seq_goals_planner_service = rospy.Service("seq_of_goals_path_planner", SeqGoalsPathPlanner, self.planner_cb)
-
-
 
     def planner_cb(self, req):
         start_pose = [req.start_point.x.data, req.start_point.y.data, req.start_point.yaw.data]
@@ -32,7 +29,11 @@ class SeqGoalsPlannerServer:
             "Start Pose: ( x , y, yaw) = ( %f , %f , %f )" % (
                 start_pose[0], start_pose[1], math.degrees(start_pose[2])))
     
-        final_pose = [req.final_point.x.data, req.final_point.y.data, req.final_point.yaw.data]
+        final_pose = [req.final_point.x.data,
+                      req.final_point.y.data,
+                      req.final_point.yaw.data,
+                      req.final_point.optimize.data]
+
         rospy.loginfo(
             "Final Pose: ( x , y, yaw) = ( %f , %f , %f )" % (
                 final_pose[0], final_pose[1], math.degrees(final_pose[2])))
@@ -42,7 +43,8 @@ class SeqGoalsPlannerServer:
         for i in range(len(req.sequence_of_goals.nodes)):
             goals_list.append([req.sequence_of_goals.nodes[i].x.data,
                                req.sequence_of_goals.nodes[i].y.data,
-                               req.sequence_of_goals.nodes[i].yaw.data])
+                               req.sequence_of_goals.nodes[i].yaw.data,
+                               req.sequence_of_goals.nodes[i].optimize.data])
 
             rospy.loginfo(
                  "Goal %d: ( x , y, yaw) = ( %f , %f , %f )" % (

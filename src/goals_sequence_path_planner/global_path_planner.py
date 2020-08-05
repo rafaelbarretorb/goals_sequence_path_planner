@@ -35,7 +35,6 @@ class GlobalPathPlanner:
         doa_angles = list()
         goals_angles = list()
 
-
         # compute the goals orientation
         for i in range(len(goals_list)):
             dod, doa = self.get_goal_orientation(paths[i], paths[i+1])
@@ -107,7 +106,8 @@ class GlobalPathPlanner:
         # Compute all optimized paths
         for i in range(len(points) - 1):
             # Do not attempt optimize
-            if points[i][2] == False:
+            # TODO ERROR, points[i][3] ???
+            if points[i+1][3] == False:
                 optimal_paths.append([])
             else:
 
@@ -142,13 +142,13 @@ class GlobalPathPlanner:
     def departure_angle(self, first_x, first_y, second_x, second_y):
         """ return the start angle"""
         theta = aim_to_point(first_x, first_y, second_x, second_y)
-        print "DOD = " + str(math.degrees(theta))
+        # print "DOD = " + str(math.degrees(theta))
         return theta
     
     def arrival_angle(self, last_but_one_x, last_but_one_y, last_x, last_y):
         """ return the final angle of the last pose of the path"""
         theta = aim_to_point(last_but_one_x, last_but_one_y, last_x, last_y)
-        print "DOA = " + str(math.degrees(theta))
+        # print "DOA = " + str(math.degrees(theta))
         return theta
                
     def angle_distance(self, theta, phi):
@@ -172,8 +172,8 @@ class GlobalPathPlanner:
         doa = self.arrival_angle(path1[-2][0], path1[-2][1], path1[-1][0], path1[-1][1]) 
 
         # DOD
-        print "DOD" + str((path2[0][0], path2[0][1])) + " --> " + str((path2[1][0], path2[1][1]))
-        print path2
+        # print "DOD" + str((path2[0][0], path2[0][1])) + " --> " + str((path2[1][0], path2[1][1]))
+        # print path2
         dod = self.departure_angle(path2[0][0], path2[0][1], path2[1][0], path2[1][1])
         #dist = self.angle_distance(theta1, theta2)
 
@@ -182,12 +182,12 @@ class GlobalPathPlanner:
     def get_best_angle(self, dod_angles, goals_angles):
 
         for i in range(len(dod_angles)):
-            print ""
-            print "DOD: " + str(math.degrees(dod_angles[i]))
-            print "Goal Angle: " + str(math.degrees(goals_angles[i]))
-            print "Distance 1: " + str(math.degrees(self.angle_distance(dod_angles[i], goals_angles[i])))
-            print "Distance 2: " + str(math.degrees(self.angle_distance(dod_angles[i], goals_angles[i] + PI)))
-            print ""
+            # print ""
+            # print "DOD: " + str(math.degrees(dod_angles[i]))
+            # print "Goal Angle: " + str(math.degrees(goals_angles[i]))
+            # print "Distance 1: " + str(math.degrees(self.angle_distance(dod_angles[i], goals_angles[i])))
+            # print "Distance 2: " + str(math.degrees(self.angle_distance(dod_angles[i], goals_angles[i] + PI)))
+            # print ""
             if goals_angles[i] != None:
                 if self.angle_distance(dod_angles[i], goals_angles[i]) > self.angle_distance(dod_angles[i], goals_angles[i] - PI):
                     goals_angles[i] = goals_angles[i] + PI
