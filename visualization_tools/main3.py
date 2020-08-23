@@ -21,18 +21,18 @@ G3 = [3.5, 0.5, PI/2, True]
 G4 = [3.5, -3.5, PI/2, True]
 
 # TEST 1
-# goals_list = [G1, G3, G4]
-# start_pose = [-3.5, -4.0, PI/2, True]
-# final_pose = [-2.5, -4.0, -PI/2, True]
+goals_list = [G1, G3, G4]
+start_pose = [-3.5, -4.0, PI/2, True]
+final_pose = [-2.5, -4.0, -PI/2, True]
 
 # goals_list = [G3]
 # start_pose = G1
 # final_pose = G4
 
 # # TEST 2
-goals_list = [G1, G3, G4, G3]
-start_pose = [-3.5, -2.0, PI/2, False]
-final_pose = [-2.5, -2.0, -PI/2, False]
+# goals_list = [G1, G3, G4, G3]
+# start_pose = [-3.5, -2.0, PI/2, False]
+# final_pose = [-2.5, -2.0, -PI/2, False]
 
 # # TEST 3
 # goals_list = [G3, G4, G3]

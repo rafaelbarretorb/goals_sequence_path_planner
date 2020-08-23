@@ -13,13 +13,14 @@ class RRT_Star:
     """
         Class for RRT* Path Planning
     """
-    def __init__(self, start_point, goal_point, grid, max_num_nodes,
-                 epsilon_min, epsilon_max, obs_resolution, maneuvers=False):
+    def __init__(self, start_point, goal_point, grid, min_num_nodes, max_num_nodes,
+                 epsilon_min, epsilon_max, radius, goal_tolerance, obs_resolution, maneuvers=False):
 
         self.grid = grid
         self.start_point = start_point[:]
         self.goal_point = goal_point[:]
 
+        self.min_num_nodes = min_num_nodes
         self.max_num_nodes = max_num_nodes
         self.epsilon_min = epsilon_min
         self.epsilon_max = epsilon_max
@@ -27,7 +28,7 @@ class RRT_Star:
 
         self.maneuvers = maneuvers
 
-        self.radius = 2.0
+        self.radius = radius
 
         if self.collision(start_point):
             print start_point
@@ -41,8 +42,11 @@ class RRT_Star:
             self.start_maneuver = Maneuver(self.start_point[0], self.start_point[1], self.start_point[2], 0.05, 0.5, pose_status_goal=False)
             self.goal_maneuver = Maneuver(self.goal_point[0], self.goal_point[1], self.goal_point[2], 0.2, 0.5, pose_status_goal=True)     
 
-        self.goal_tolerance = 0.2
+        self.goal_tolerance = goal_tolerance
         self.node_id = -1
+
+        self.goal_found = False
+        self.goal_node_id = None
 
     def add_new_node(self, new_node):
         # Insert the first node into the nodes array
@@ -177,7 +181,7 @@ class RRT_Star:
                     self.nodes[2][int(node_id)] = cost_new_node + self.dist(x_node, y_node, x_new_node, y_new_node)
 
     def path_planning(self):
-        """ Execute the planning."""
+        """ Execute the planner"""
 
         # First node
         initial_node = self.make_node(self.start_point[0], self.start_point[1], -1)
@@ -203,32 +207,42 @@ class RRT_Star:
                     self.rewire(new_node_id)            
                     foundNext = True
 
-            # check if the distance between the goal node and the new node is less than the goal radius
-            if self.is_goal_reached(int(new_node_id), self.goal_point, self.goal_tolerance) and self.nodes.shape[1] > 1000:
-                path_x = list()
-                path_y = list()
-
-                new_goal_node_id = int(self.nodes[3][-1])
-
-                self.nodes[0][new_goal_node_id] = self.goal_point[0]
-                self.nodes[1][new_goal_node_id] = self.goal_point[1]
-
-                # Final path
-                curr_node_id = new_goal_node_id
-                while curr_node_id != -1:
-                    path_x.insert(0, self.nodes[0][curr_node_id])
-                    path_y.insert(0, self.nodes[1][curr_node_id])
-
-                    parent_id = int(self.nodes[4][curr_node_id])
-                    curr_node_id = parent_id          
+            if not self.goal_found:
+                # check if the distance between the goal node and the new node is less than the goal tolerance
                 
-                print "Nodes Amount: " + str(int(new_goal_node_id))
-                #print self.nodes[:, 0:4]
-                return path_x, path_y
+                if self.is_goal_reached(int(new_node_id), self.goal_point, self.goal_tolerance):
+                    self.goal_found = True
+
+                    # Set the goal node identification
+                    self.goal_node_id = int(self.nodes[3][-1])
+                    path_x, path_y = self.compute_path()
+                    if self.nodes.shape[1] >= self.min_num_nodes:
+                        print "Nodes Amount: " + str(self.nodes.shape[1])
+                        return path_x, path_y
+            else:
+                path_x, path_y = self.compute_path()
+            
+                if self.nodes.shape[1] >= self.min_num_nodes:
+                    print "Nodes Amount: " + str(self.nodes.shape[1])
+                    return path_x, path_y
         
-        print "Nodes Amount: " + str(int(new_goal_node_id))
         return [], []
-  
+
+    def compute_path(self):
+        """ . """
+        path_x = list()
+        path_y = list()
+
+        curr_node_id = self.goal_node_id
+        while curr_node_id != -1:
+            path_x.insert(0, self.nodes[0][curr_node_id])
+            path_y.insert(0, self.nodes[1][curr_node_id])
+
+            parent_id = int(self.nodes[4][curr_node_id])
+            curr_node_id = parent_id          
+
+        return path_x, path_y
+
     def sample_free(self):
         """  Get a random point located in a free area
 

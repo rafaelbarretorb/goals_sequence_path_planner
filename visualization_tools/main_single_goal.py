@@ -26,12 +26,15 @@ scatter_area = PI*r*r
 start_pose = [-4.0, 2.5, -PI/4]
 goal_pose = [3.5, 0.5, -PI/2]
 
+goal_tolerance = 0.2
+
 # FIGURE 1
 grid_map, graph = make_world()
 
 # make RRT* Path Planning
-rrt_star = RRT_Star(start_point=start_pose, goal_point=goal_pose, grid=grid_map,
-                    max_num_nodes=5000, epsilon_min=0.0, epsilon_max=0.5, obs_resolution=0.1, maneuvers=True)
+rrt_star = RRT_Star(start_point=start_pose, goal_point=goal_pose, grid=grid_map, min_num_nodes=7500,
+                    max_num_nodes=15000, epsilon_min=0.0, epsilon_max=0.5, radius=0.5, goal_tolerance = 0.2,
+                    obs_resolution=0.1, maneuvers=True)
 
 path_x, path_y = rrt_star.path_planning()
 
@@ -40,7 +43,7 @@ plt.plot(path_x[:], path_y[:])
 plt.scatter(path_x, path_y)
 
 ########################################################
-goal_tolerance = 0.2
+
 maneuver_radius = 0.5
 
 # START Pose

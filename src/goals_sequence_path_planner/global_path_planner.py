@@ -79,9 +79,9 @@ class GlobalPathPlanner:
             path = list()
             # make RRT* Path Planning
             rrt_star = RRT_Star(start_point=points[i], goal_point=points[i+1], grid=self.global_map,
-                max_num_nodes=10000,
-                epsilon_min=0.1,
-                epsilon_max=0.5, obs_resolution=0.1, maneuvers=False)
+                min_num_nodes=1000, max_num_nodes=7500,
+                epsilon_min=0.0, epsilon_max=0.5, radius=1.0, goal_tolerance = 0.2,
+                obs_resolution=0.1, maneuvers=False)
 
             path_x, path_y = rrt_star.path_planning()
             
@@ -115,9 +115,9 @@ class GlobalPathPlanner:
                 
                 # TODO Limit time (max 10 secs example) 
                 rrt_star = RRT_Star(start_point=points[i], goal_point=points[i+1], grid=self.global_map,
-                    max_num_nodes=7000,
-                    epsilon_min=0.1,
-                    epsilon_max=0.5, obs_resolution=0.1, maneuvers=True)
+                    min_num_nodes=1500, max_num_nodes=7500,
+                    epsilon_min=0.0, epsilon_max=0.5, radius=1.0, goal_tolerance = 0.2,
+                    obs_resolution=0.1, maneuvers=True)
 
                 path_x, path_y = rrt_star.path_planning()
 
