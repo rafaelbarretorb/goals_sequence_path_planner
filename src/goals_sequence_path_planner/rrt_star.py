@@ -371,7 +371,6 @@ class RRT_Star:
             return True
 
     def update_radius(self):
-        nnode = self.nodes.shape[1] + 1
+        nodes_size = self.nodes.shape[1] + 1
         self.radius = 1.0
-        self.radius = self.k*math.sqrt((math.log(nnode) / nnode))
-        print self.radius
+        self.radius = self.k*math.sqrt((math.log(nodes_size) / nodes_size))
