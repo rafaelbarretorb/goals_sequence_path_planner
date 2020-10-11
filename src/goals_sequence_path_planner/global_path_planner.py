@@ -115,7 +115,7 @@ class GlobalPathPlanner:
                 
                 # TODO Limit time (max 10 secs example) 
                 rrt_star = RRT_Star(start_point=points[i], goal_point=points[i+1], grid=self.global_map,
-                    min_num_nodes=1500, max_num_nodes=7500,
+                    min_num_nodes=2000, max_num_nodes=7500,
                     epsilon_min=0.0, epsilon_max=0.5, radius=1.0, goal_tolerance = 0.2,
                     obs_resolution=0.1, maneuvers=True)
 

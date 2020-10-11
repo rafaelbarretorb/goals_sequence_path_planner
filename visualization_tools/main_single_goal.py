@@ -32,8 +32,8 @@ goal_tolerance = 0.2
 grid_map, graph = make_world()
 
 # make RRT* Path Planning
-rrt_star = RRT_Star(start_point=start_pose, goal_point=goal_pose, grid=grid_map, min_num_nodes=7500,
-                    max_num_nodes=15000, epsilon_min=0.0, epsilon_max=0.5, radius=0.5, goal_tolerance = 0.2,
+rrt_star = RRT_Star(start_point=start_pose, goal_point=goal_pose, grid=grid_map, min_num_nodes=2000,
+                    max_num_nodes=5000, epsilon_min=0.0, epsilon_max=0.5, radius=1.0, goal_tolerance = 0.2,
                     obs_resolution=0.1, maneuvers=True)
 
 path_x, path_y = rrt_star.path_planning()
@@ -44,7 +44,7 @@ plt.scatter(path_x, path_y)
 
 ########################################################
 
-maneuver_radius = 0.5
+maneuver_radius = 0.75
 
 # START Pose
 start_maneuver = Maneuver(start_pose[0], start_pose[1], start_pose[2], 0.05, maneuver_radius, False)
@@ -75,7 +75,6 @@ plt.plot(x_goal_left, y_goal_left)
 plt.plot(x_goal_arc, y_goal_arc)
 
 difference = (later - now).total_seconds()
-print difference
 ########################################################
 ##### SPLINE #####
 # data = list()

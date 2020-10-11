@@ -28,19 +28,18 @@ class RRT_Star:
 
         self.maneuvers = maneuvers
 
-        self.radius = radius
+        self.radius = 0.0
+        self.k = 20.0
 
         if self.collision(start_point):
-            print start_point
             sys.exit("ERROR!!!!. Start Position is not allowed.")
 
         if self.collision(goal_point):
-            print goal_point
             sys.exit("ERROR!!!!. Goal Position is not allowed.")
 
         if self.maneuvers:
-            self.start_maneuver = Maneuver(self.start_point[0], self.start_point[1], self.start_point[2], 0.05, 0.5, pose_status_goal=False)
-            self.goal_maneuver = Maneuver(self.goal_point[0], self.goal_point[1], self.goal_point[2], 0.2, 0.5, pose_status_goal=True)     
+            self.start_maneuver = Maneuver(self.start_point[0], self.start_point[1], self.start_point[2], 0.05, 0.75, pose_status_goal=False)
+            self.goal_maneuver = Maneuver(self.goal_point[0], self.goal_point[1], self.goal_point[2], 0.2, 0.75, pose_status_goal=True)     
 
         self.goal_tolerance = goal_tolerance
         self.node_id = -1
@@ -120,6 +119,7 @@ class RRT_Star:
         return distance
 
     def choose_parent(self, new_node):
+        self.update_radius()
 
         # distance array
         #print ""
@@ -217,13 +217,13 @@ class RRT_Star:
                     self.goal_node_id = int(self.nodes[3][-1])
                     path_x, path_y = self.compute_path()
                     if self.nodes.shape[1] >= self.min_num_nodes:
-                        print "Nodes Amount: " + str(self.nodes.shape[1])
+                        # print "Nodes Amount: " + str(self.nodes.shape[1])
                         return path_x, path_y
             else:
                 path_x, path_y = self.compute_path()
             
                 if self.nodes.shape[1] >= self.min_num_nodes:
-                    print "Nodes Amount: " + str(self.nodes.shape[1])
+                    # print "Nodes Amount: " + str(self.nodes.shape[1])
                     return path_x, path_y
         
         return [], []
@@ -369,3 +369,9 @@ class RRT_Star:
                 n = n + 1
 
             return True
+
+    def update_radius(self):
+        nnode = self.nodes.shape[1] + 1
+        self.radius = 1.0
+        self.radius = self.k*math.sqrt((math.log(nnode) / nnode))
+        print self.radius
