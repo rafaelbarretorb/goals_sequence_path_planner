@@ -22,7 +22,7 @@ grid =  np.zeros([grid_height, grid_width])
 
 def make_world():
 
-    fig = plt.figure(figsize=(10,10))
+    fig = plt.figure(figsize=(7,7))
 
     plt.xlim(-SQUARE_DIM, SQUARE_DIM)
     plt.ylim(-SQUARE_DIM, SQUARE_DIM)
