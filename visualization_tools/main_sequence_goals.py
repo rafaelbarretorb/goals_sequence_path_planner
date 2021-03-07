@@ -19,14 +19,17 @@ PI = math.pi
 arrow_width = 0.05
 arrow_length = 0.3
 
-G1 = [-3.5, 3.5, PI, True]
-G2 = [-0.5, 3.0, 0, False]
+G1 = [3.0, 0.3, PI/2, True]
+G2 = [3.0, 2.0, PI/2, True]
+# G2 = [-0.5, 3.5, None, True]
 G3 = [3.5, 0.5, PI/2, True]
 G4 = [3.5, -3.5, PI/2, True]
 
-start_pose = [-3.5, -4.0, PI/2, True]
-final_pose = [-2.5, -4.0, -PI/2, True]
-
+start_pose = [0.0, 0.0, 0.0, True]
+# start_pose = [-3.5, -4.0, PI/2, True]
+# start_pose = G1
+# final_pose = [-2.5, -4.0, -PI/2, True]
+final_pose = [1.0, 1.0, 0.0, True]
 ##############################
 # TESTS
 ##############################
@@ -42,12 +45,12 @@ final_pose = [-2.5, -4.0, -PI/2, True]
 
 # TEST 4
 # goals_list = [G1, G2, G3, G4]
-goals_list = [G2]
+goals_list = [G1, G2]
 
 
 # goals_list = [G1, G2, G3]
 
-# goals_list = [G1, G3, G2, G4]
+# goals_list = [G1, G2, G3, G4]
 
 
 # TEST 4
@@ -64,20 +67,20 @@ planner = GlobalPathPlanner(start_pose=start_pose, global_map=grid_map, final_po
 
 paths = planner.usual_paths(goals_list)
 
-dod_angles = list()
-doa_angles = list()
+# dod_angles = list()
+# doa_angles = list()
 
 goals_angles = list()
+dod_between_doa_angles = list()
 
 for i in range(len(goals_list)):
 	dod, doa = planner.get_goal_orientation(paths[i], paths[i+1])
-	dod_angles.append(dod)
-	doa_angles.append(doa)
+	dod_between_doa_angles.append(planner.avg_angle_of_two_angles(dod, doa))
 	goals_angles.append(goals_list[i][2])
 
 # print [math.degrees(goals_angles[0]), math.degrees(goals_angles[1]), math.degrees(goals_angles[2])]
 
-goals_angles = planner.get_best_angle(dod_angles, goals_angles)
+goals_angles = planner.get_best_angle(dod_between_doa_angles, goals_angles)
 
 # print [math.degrees(goals_angles[0]), math.degrees(goals_angles[1]), math.degrees(goals_angles[2])]
 

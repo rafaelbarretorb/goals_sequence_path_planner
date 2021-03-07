@@ -31,18 +31,24 @@ class GlobalPathPlanner:
         # paths with standard method
         paths = self.usual_paths(goals_list)
 
-        dod_angles = list()
-        doa_angles = list()
+        # dod_angles = list()
+        # doa_angles = list()
         goals_angles = list()
+
+        dod_between_doa_angles = list()
 
         # compute the goals orientation
         for i in range(len(goals_list)):
             dod, doa = self.get_goal_orientation(paths[i], paths[i+1])
-            dod_angles.append(dod)
-            doa_angles.append(doa)
-            goals_angles.append(goals_list[i][2])
+            # dod_angles.append(dod)
+            # doa_angles.append(doa)
 
-        goals_angles = self.get_best_angle(dod_angles, goals_angles)
+            dod_between_doa_angles.append(self.avg_angle_of_two_angles(dod, doa))
+
+            goals_angles.append(goals_list[i][2])
+        
+        # TODO        
+        goals_angles = self.get_best_angle(dod_between_doa_angles, goals_angles)
 
         for i in range(len(goals_angles)):
             goals_list[i][2] = goals_angles[i]
@@ -79,14 +85,17 @@ class GlobalPathPlanner:
             path = list()
             # make RRT* Path Planning
             rrt_star = RRT_Star(start_point=points[i], goal_point=points[i+1], grid=self.global_map,
-                min_num_nodes=1000, max_num_nodes=7500,
-                epsilon_min=0.0, epsilon_max=0.5, radius=1.0, goal_tolerance = 0.2,
+                min_num_nodes=1000, max_num_nodes=5000,
+                epsilon_min=0.1, epsilon_max=0.5, radius=1.0, goal_tolerance = 0.2,
                 obs_resolution=0.1, maneuvers=False)
 
             path_x, path_y = rrt_star.path_planning()
             
             # Change the goal positions
             if i < len(points) - 1:
+                # print "i = " + str(i)
+                # print "points length: " + str(len(points))
+                # print "path length: " + str(len(path_x))
                 points[i+1][0] = path_x[-1]
                 points[i+1][1] = path_y[-1]
 
@@ -115,8 +124,8 @@ class GlobalPathPlanner:
                 
                 # TODO Limit time (max 10 secs example) 
                 rrt_star = RRT_Star(start_point=points[i], goal_point=points[i+1], grid=self.global_map,
-                    min_num_nodes=2000, max_num_nodes=7500,
-                    epsilon_min=0.0, epsilon_max=0.5, radius=1.0, goal_tolerance = 0.2,
+                    min_num_nodes=1000, max_num_nodes=5000,
+                    epsilon_min=0.1, epsilon_max=0.5, radius=1.0, goal_tolerance = 0.2,
                     obs_resolution=0.1, maneuvers=True)
 
                 path_x, path_y = rrt_star.path_planning()
@@ -179,9 +188,9 @@ class GlobalPathPlanner:
 
         return dod, doa
     
-    def get_best_angle(self, dod_angles, goals_angles):
+    def get_best_angle(self, avg_angles, goals_angles):
 
-        for i in range(len(dod_angles)):
+        for i in range(len(avg_angles)):
             # print ""
             # print "DOD: " + str(math.degrees(dod_angles[i]))
             # print "Goal Angle: " + str(math.degrees(goals_angles[i]))
@@ -189,7 +198,26 @@ class GlobalPathPlanner:
             # print "Distance 2: " + str(math.degrees(self.angle_distance(dod_angles[i], goals_angles[i] + PI)))
             # print ""
             if goals_angles[i] != None:
-                if self.angle_distance(dod_angles[i], goals_angles[i]) > self.angle_distance(dod_angles[i], goals_angles[i] - PI):
+                if self.angle_distance(avg_angles[i], goals_angles[i]) > self.angle_distance(avg_angles[i], goals_angles[i] - PI):
                     goals_angles[i] = goals_angles[i] + PI
 
         return goals_angles
+
+    def avg_angle_of_two_angles(self, theta1, theta2):
+        half_ang_dist = self.angle_distance(theta1, theta2)/2
+
+        if abs(self.wrap_to_pi(theta1 + half_ang_dist) - self.wrap_to_pi(theta2 - half_ang_dist)) < 0.01:
+            print "avg angle" + str((180/PI)*self.wrap_to_pi(theta1 + half_ang_dist))
+            return self.wrap_to_pi(theta1 + half_ang_dist)
+        elif abs(self.wrap_to_pi(theta1 - half_ang_dist) - self.wrap_to_pi(theta2 + half_ang_dist)) < 0.01:
+            print "avg angle" + str((180/PI)*self.wrap_to_pi(theta1 - half_ang_dist))
+            return self.wrap_to_pi(theta1 - half_ang_dist)
+        else:
+            return None
+
+    def wrap_to_pi(self, angle):
+            while angle > PI:
+                angle -= 2 * PI
+            while angle < -PI:
+                angle += 2 * PI
+            return angle 
