@@ -13,8 +13,10 @@ class RRT_Star:
     """
         Class for RRT* Path Planning
     """
-    def __init__(self, start_point, goal_point, grid, min_num_nodes, max_num_nodes,
-                 epsilon_min, epsilon_max, radius, goal_tolerance, obs_resolution, maneuvers=False):
+    def __init__(self, start_point, goal_point, grid,
+                 min_num_nodes, max_num_nodes, epsilon_min, epsilon_max,
+                 radius, goal_tolerance, obs_resolution,
+                 x_dim, y_dim, maneuvers=False):
 
         self.grid = grid
         self.start_point = start_point[:]
@@ -28,8 +30,12 @@ class RRT_Star:
 
         self.maneuvers = maneuvers
 
+        self.x_dim = x_dim
+        self.y_dim = y_dim
+
         self.radius = 0.0
         self.k = 20.0
+        self.goal_tolerance = goal_tolerance
 
         if self.collision(start_point):
             sys.exit("ERROR!!!!. Start Position is not allowed.")
@@ -38,10 +44,13 @@ class RRT_Star:
             sys.exit("ERROR!!!!. Goal Position is not allowed.")
 
         if self.maneuvers:
-            self.start_maneuver = Maneuver(self.start_point[0], self.start_point[1], self.start_point[2], 0.05, 0.5, pose_status_goal=False)
-            self.goal_maneuver = Maneuver(self.goal_point[0], self.goal_point[1], self.goal_point[2], 0.2, 0.5, pose_status_goal=True)     
+            self.start_maneuver = Maneuver(self.start_point[0], self.start_point[1], self.start_point[2],
+                                           0.05, 0.5, pose_status_goal=False)
 
-        self.goal_tolerance = goal_tolerance
+            self.goal_maneuver = Maneuver(self.goal_point[0], self.goal_point[1], self.goal_point[2],
+                                          self.goal_tolerance, 0.5, pose_status_goal=True)     
+
+
         self.node_id = -1
 
         self.goal_found = False
@@ -125,7 +134,6 @@ class RRT_Star:
         #print ""
         dist_arr = self.get_vector_distance([new_node[0], new_node[1]])
 
-
         dist_arr_numbered = np.stack((dist_arr, np.arange(dist_arr.shape[0])), axis = 0)
 
         condition = dist_arr_numbered[0, :] < self.radius
@@ -149,8 +157,11 @@ class RRT_Star:
                     curr_parent_id = int(node_id)
         
         # Update the cost and parent_id of the new node
-        # cost
-        new_node[2] = self.nodes[2][curr_parent_id] + self.dist(self.nodes[0][curr_parent_id], self.nodes[1][curr_parent_id], new_node[0], new_node[1])
+        # new_node_cost = parent_cost + distance(parent, new_node)
+        new_node[2] = self.nodes[2][curr_parent_id] + self.dist(self.nodes[0][curr_parent_id],
+                                                                self.nodes[1][curr_parent_id],
+                                                                new_node[0],
+                                                                new_node[1])
         # parent_id
         new_node[4] = curr_parent_id
         return new_node
@@ -210,7 +221,7 @@ class RRT_Star:
             if not self.goal_found:
                 # check if the distance between the goal node and the new node is less than the goal tolerance
                 
-                if self.is_goal_reached(int(new_node_id), self.goal_point, self.goal_tolerance):
+                if self.is_goal_reached(int(new_node_id), self.goal_point):
                     self.goal_found = True
 
                     # Set the goal node identification
@@ -252,7 +263,7 @@ class RRT_Star:
 
         """
         for i in range(10000):
-            x_rand = (random.random() - 0.5)*8, (random.random() - 0.5)*8
+            x_rand = (random.random() - 0.5)*self.x_dim, (random.random() - 0.5)*self.y_dim
             if not self.collision(x_rand) and self.make_maneuver(x_rand[0], x_rand[1]):
                 return x_rand
 
@@ -270,11 +281,11 @@ class RRT_Star:
 
         return cell_row, cell_col
 
-    def is_goal_reached(self, new_node_id, goal_point, radius):
+    def is_goal_reached(self, new_node_id, goal_point):
         """ ."""
         new_node_id = int(new_node_id)
         distance = self.dist(self.nodes[0][new_node_id], self.nodes[1][new_node_id], goal_point[0], goal_point[1])
-        if (distance <= radius):
+        if (distance <= self.goal_tolerance):
             return True
         return False
 

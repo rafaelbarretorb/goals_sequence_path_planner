@@ -14,65 +14,62 @@ import copy
 
 PI = math.pi
 
-class GlobalPathPlanner:
+class SequenceOfGoalsPlanner:
     """
     """
 
-    # TODO
-    # - Risk Zones?
-    def __init__(self, start_pose, global_map, final_pose):
+    def __init__(self, start_pose, final_pose, goals_list, global_map, x_dim, y_dim):
 
         self.start_pose = start_pose
         self.final_pose = final_pose
+        self.goals_list = goals_list
         self.global_map = global_map
 
-    def global_path_planner(self, goals_list):
+        self.x_dim = x_dim
+        self.y_dim = y_dim
 
-        # paths with standard method
-        paths = self.usual_paths(goals_list)
+        self.dod_angles = list()
+        self.doa_angles = list()
+        self.result_directions = list()
 
-        # dod_angles = list()
-        # doa_angles = list()
+        self.usual_paths = list()
+        self.optimized_paths = list()
+
+        self.run_planner()
+
+    def run_planner(self):
+
+        # paths usual method
+        self.usual_planning()
+
+        # TODO remove this variable
         goals_angles = list()
 
-        dod_between_doa_angles = list()
-
         # compute the goals orientation
-        for i in range(len(goals_list)):
-            dod, doa = self.get_goal_orientation(paths[i], paths[i+1])
-            # dod_angles.append(dod)
-            # doa_angles.append(doa)
+        for i in range(len(self.goals_list)):
+            dod, doa = self.get_goal_orientation(self.usual_paths[i], self.usual_paths[i+1])
+            self.dod_angles.append(dod)
+            self.doa_angles.append(doa)
+            self.result_directions.append(self.avg_angle_of_two_angles(dod, doa))
 
-            dod_between_doa_angles.append(self.avg_angle_of_two_angles(dod, doa))
+            goals_angles.append(self.goals_list[i][2])
+          
+        new_goals_angles = self.get_best_angle(self.result_directions, goals_angles)
 
-            goals_angles.append(goals_list[i][2])
-        
-        # TODO        
-        goals_angles = self.get_best_angle(dod_between_doa_angles, goals_angles)
+        for i in range(len(new_goals_angles)):
+            self.goals_list[i][2] = new_goals_angles[i]
 
-        for i in range(len(goals_angles)):
-            goals_list[i][2] = goals_angles[i]
-
-        points = copy.deepcopy(goals_list)
+        points = copy.deepcopy(self.goals_list)
         points.insert(0, self.start_pose)
         points.append(self.final_pose)
 
         # paths with proposed method
-        optimal_paths = self.optimized_paths(points)
-
-        # check if there is an empty path
-        for i in range(len(optimal_paths)):
-            if len(optimal_paths[i]) == 0:
-                optimal_paths[i] = copy.deepcopy(paths[i])
-
-        return optimal_paths
+        self.optimized_planning(points)
 
 
-    def usual_paths(self, goals_list):
-        
-        usual_paths = list()
+    def usual_planning(self):
 
-        points = goals_list[:]
+        points = self.goals_list[:]
 
         # Insert the start point
         points.insert(0, [self.start_pose[0], self.start_pose[1]])
@@ -85,9 +82,9 @@ class GlobalPathPlanner:
             path = list()
             # make RRT* Path Planning
             rrt_star = RRT_Star(start_point=points[i], goal_point=points[i+1], grid=self.global_map,
-                min_num_nodes=1000, max_num_nodes=5000,
-                epsilon_min=0.1, epsilon_max=0.5, radius=1.0, goal_tolerance = 0.2,
-                obs_resolution=0.1, maneuvers=False)
+                min_num_nodes=500, max_num_nodes=5000,
+                epsilon_min=0.00, epsilon_max=0.25, radius=0.5, goal_tolerance=0.2,
+                obs_resolution=0.1, x_dim=self.x_dim, y_dim=self.y_dim, maneuvers=False)
 
             path_x, path_y = rrt_star.path_planning()
             
@@ -102,13 +99,11 @@ class GlobalPathPlanner:
             for j in range(len(path_x)):
                 path.append([path_x[j], path_y[j]])
 
-            usual_paths.append(path)
+            self.usual_paths.append(path)
         
-        return usual_paths
 
-    def optimized_paths(self, points):
+    def optimized_planning(self, points):
         
-        optimal_paths = list()
 
         last_path_failed = False
 
@@ -117,16 +112,16 @@ class GlobalPathPlanner:
             # Do not attempt optimize
             # TODO ERROR, points[i][3] ???
             if points[i+1][3] == False:
-                optimal_paths.append([])
+                self.optimized_paths.append([])
             else:
 
                 path = list()
                 
                 # TODO Limit time (max 10 secs example) 
                 rrt_star = RRT_Star(start_point=points[i], goal_point=points[i+1], grid=self.global_map,
-                    min_num_nodes=1000, max_num_nodes=5000,
-                    epsilon_min=0.1, epsilon_max=0.5, radius=1.0, goal_tolerance = 0.2,
-                    obs_resolution=0.1, maneuvers=True)
+                    min_num_nodes=500, max_num_nodes=5000,
+                    epsilon_min=0.00, epsilon_max=0.25, radius=0.5, goal_tolerance = 0.2,
+                    obs_resolution=0.1, x_dim=self.x_dim, y_dim=self.y_dim, maneuvers=True)
 
                 path_x, path_y = rrt_star.path_planning()
 
@@ -140,13 +135,17 @@ class GlobalPathPlanner:
                     for j in range(len(path_x)):
                         path.append([path_x[j], path_y[j]])
 
-                    optimal_paths.append(path)
+                    self.optimized_paths.append(path)
                     last_path_failed = False
                 else:
+                    print "Path " + str(i) + " failed!"
                     last_path_failed = True
-                    optimal_paths.append([])
+                    self.optimized_paths.append([])
         
-        return optimal_paths
+        # check if there is an empty path
+        for i in range(len(self.optimized_paths)):
+            if len(self.optimized_paths[i]) == 0:
+                self.optimized_paths[i] = copy.deepcopy(paths[i])
 
     def departure_angle(self, first_x, first_y, second_x, second_y):
         """ return the start angle"""
@@ -207,10 +206,10 @@ class GlobalPathPlanner:
         half_ang_dist = self.angle_distance(theta1, theta2)/2
 
         if abs(self.wrap_to_pi(theta1 + half_ang_dist) - self.wrap_to_pi(theta2 - half_ang_dist)) < 0.01:
-            print "avg angle" + str((180/PI)*self.wrap_to_pi(theta1 + half_ang_dist))
+            # print "avg angle" + str((180/PI)*self.wrap_to_pi(theta1 + half_ang_dist))
             return self.wrap_to_pi(theta1 + half_ang_dist)
         elif abs(self.wrap_to_pi(theta1 - half_ang_dist) - self.wrap_to_pi(theta2 + half_ang_dist)) < 0.01:
-            print "avg angle" + str((180/PI)*self.wrap_to_pi(theta1 - half_ang_dist))
+            # print "avg angle" + str((180/PI)*self.wrap_to_pi(theta1 - half_ang_dist))
             return self.wrap_to_pi(theta1 - half_ang_dist)
         else:
             return None
@@ -220,4 +219,19 @@ class GlobalPathPlanner:
                 angle -= 2 * PI
             while angle < -PI:
                 angle += 2 * PI
-            return angle 
+            return angle
+
+    def get_doa_angles(self):
+        return self.doa_angles
+
+    def get_dod_angles(self):
+        return self.dod_angles
+    
+    def get_resultant_direction_angles(self):
+        return result_directions
+    
+    def get_usual_paths(self):
+        return self.usual_paths
+    
+    def get_optimized_paths(self):
+        return self.optimized_paths
