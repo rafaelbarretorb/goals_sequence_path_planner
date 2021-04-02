@@ -16,13 +16,11 @@ PI = math.pi
 
 colors = ["green", "blue", "red", "orange", "black"]
 
+# Arrow Pose
+arrow_width = 0.05
+arrow_length = 0.3
+
 def main():
-
-    plot_dod_doa = True
-
-    # Pose
-    arrow_width = 0.05
-    arrow_length = 0.3
 
     # TODO put separate file these variables
     start_pose = [-3.0, -3.0, PI/4, True]
@@ -79,77 +77,18 @@ def main():
                                 y_dim=10.0)
 
     paths = planner.get_usual_paths()
+    dod_angles = planner.get_dod_angles()
+    doa_angles = planner.get_doa_angles()
 
+    # Plot
     plot_paths(paths, scatter=True)
-
-
-    # dod_angles = list()
-    # doa_angles = list()
-
-    # goals_angles = list()
-    # dod_between_doa_angles = list()
-
-    # for i in range(len(goals_list)):
-    #     dod, doa = planner.get_goal_orientation(paths[i], paths[i+1])
-    #     dod_between_doa_angles.append(planner.avg_angle_of_two_angles(dod, doa))
-    #     goals_angles.append(goals_list[i][2])
-
-    # # print [math.degrees(goals_angles[0]), math.degrees(goals_angles[1]), math.degrees(goals_angles[2])]
-
-    # goals_angles = planner.get_best_angle(dod_between_doa_angles, goals_angles)
-
-    # # print [math.degrees(goals_angles[0]), math.degrees(goals_angles[1]), math.degrees(goals_angles[2])]
-
-    # # DOA
-    # # for i in range(len(doa_angles)):
-	
-
-    # for i in range(len(goals_angles)):
-    #     goals_list[i][2] = goals_angles[i]
-
+    plot_dod_doa(paths, dod_angles, doa_angles)
     
+    # Start Pose
+    plot_pose(start_pose[0], start_pose[1], start_pose[2], 'purple')
 
-    # for i in range(len(paths)):
-    #     x = list()
-    #     y = list()
-    #     for j in range(len(paths[i])):
-    #         x.append(paths[i][j][0])
-    #         y.append(paths[i][j][1])
-    #     plt.plot(x,y, color=colors[i])
-	# plt.scatter(x,y, color=colors[i])
-
-	# DOD
-	# endx, endy = get_arrow_pose(paths[i][-1][0], paths[i][-1][1], goals_list[i][2], arrow_length=0.3)
-	# pylab.arrow(paths[i][-1][0], paths[i][-1][1], endx, endy, width=0.0075, color='black')
-
-    # Arrival Angles
-    # endx, endy = get_arrow_pose(paths[i][-1][0], paths[i][-1][1], goals_list3[i][2], arrow_length=0.3)
-    # pylab.arrow(paths[i][-1][0], paths[i][-1][1], endx, endy, width=0.0075, color='green')
-
-    # endx, endy = get_arrow_pose(paths[i][-1][0], paths[i][-1][1], goals_list2[i][2], arrow_length=0.3)
-    # pylab.arrow(paths[i][-1][0], paths[i][-1][1], endx, endy, width=0.0075, color='green')
-
-    # start_endx, start_endy = get_arrow_pose(start_pose[0], start_pose[1], start_pose[2], arrow_length=0.3)
-    # pylab.arrow(start_pose[0], start_pose[1], start_endx, start_endy, width=arrow_width, color='red')
-
-    # endx, endy = get_arrow_pose(x[-1], y[-1], final_pose[2], arrow_length=0.3)
-    # pylab.arrow(x[-1], y[-1], endx, endy, width=arrow_width, color='green')
-
-
-    # points = copy.deepcopy(goals_list)
-    # points.insert(0, start_pose)
-    # points.append(final_pose)
-
-
-
-    # if plot_dod_doa:
-    #     plot_dod_doa()
-
-    #     # Plot Start Pose
-    #     plot_pose(start_pose[0], start_pose[1], start_pose[2], 'red')
-
-    #     # Plot Goal Pose
-    #     plot_pose(start_pose[0], start_pose[1], final_pose[2], 'red')
+    # Final Pose
+    plot_pose(paths[-1][-1][0], paths[-1][-1][1], final_pose[2], 'orange')
 
     # --------------------
     # ----- FIGURE 2 -----
@@ -158,37 +97,7 @@ def main():
     make_new_world()
 
     opt_paths = planner.get_optimized_paths()
-    plot_paths(opt_paths )
-
-    #     for i in range(len(opt_paths)):
-    #     # if the path size is zero than use the usual path
-    #     if len(opt_paths[i]) == 0:
-    #         opt_paths[i] = paths[i][:]
-    #         if i > 0:
-    #         opt_paths[i][0] = opt_paths[i-1][-1]
-
-    #     x = list()
-    #     y = list()
-    #     for j in range(len(opt_paths[i])):
-    #         x.append(opt_paths[i][j][0])
-    #         y.append(opt_paths[i][j][1])
-    #     plt.plot(x,y, color=colors[i])
-
-
-
-    # grid_map, graph = make_world()
-    # smoother_paths = planner.make_paths_smoother(opt_paths)
-
-    # for i in range(len(smoother_paths)):
-    # 	x, y = smoother_paths[i].T
-    # 	plt.plot(x,y, color=colors[i])
-
-    # start_endx, start_endy = get_arrow_pose(start_pose[0], start_pose[1], start_pose[2], arrow_length=0.3)
-    # pylab.arrow(start_pose[0], start_pose[1], start_endx, start_endy, width=arrow_width, color='red')
-
-    # endx, endy = get_arrow_pose(x[-1], y[-1], final_pose[2], arrow_length=0.3)
-    # pylab.arrow(x[-1], y[-1], endx, endy, width=arrow_width, color='green')
-
+    plot_paths(opt_paths)
 
     # --------------------
     # ----- FIGURE 3 -----
@@ -229,20 +138,18 @@ def plot_paths(paths, scatter=False):
         if scatter:
             plt.scatter(x, y, color=colors[i])
 
-def plot_dod_doa(dod_angles, doa_angles):
+def plot_dod_doa(paths, dod_angles, doa_angles):
     for i in range(len(dod_angles)):
         x = paths[i][-1][0]
         y = paths[i][-1][1]
 
         # DOA
         doa = doa_angles[i]
-        endx, endy = get_arrow_pose(x, y, doa, arrow_length=0.3)
-        pylab.arrow(x, y, endx, endy, width=arrow_width, color='green')
+        plot_pose(x, y, doa, 'red')
 
         # DOD
         dod = dod_angles[i]
-        endx, endy = get_arrow_pose(x, y, dod, arrow_length=0.3)
-        pylab.arrow(x, y, endx, endy, width=arrow_width, color='green')
+        plot_pose(x, y, dod, 'brown')
 
 def make_new_world():
     grid_map, graph = make_world()

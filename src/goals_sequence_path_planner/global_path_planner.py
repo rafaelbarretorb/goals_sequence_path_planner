@@ -228,7 +228,7 @@ class SequenceOfGoalsPlanner:
         return self.dod_angles
     
     def get_resultant_direction_angles(self):
-        return result_directions
+        return self.result_directions
     
     def get_usual_paths(self):
         return self.usual_paths
