@@ -82,8 +82,8 @@ class SequenceOfGoalsPlanner:
             path = list()
             # make RRT* Path Planning
             rrt_star = RRT_Star(start_point=points[i], goal_point=points[i+1], grid=self.global_map,
-                min_num_nodes=500, max_num_nodes=5000,
-                epsilon_min=0.00, epsilon_max=0.25, radius=0.5, goal_tolerance=0.2,
+                min_num_nodes=1500, max_num_nodes=7000,
+                epsilon_min=0.00, epsilon_max=0.2, radius=0.75, goal_tolerance=0.2,
                 obs_resolution=0.1, x_dim=self.x_dim, y_dim=self.y_dim, maneuvers=False)
 
             path_x, path_y = rrt_star.path_planning()
@@ -119,8 +119,8 @@ class SequenceOfGoalsPlanner:
                 
                 # TODO Limit time (max 10 secs example) 
                 rrt_star = RRT_Star(start_point=points[i], goal_point=points[i+1], grid=self.global_map,
-                    min_num_nodes=500, max_num_nodes=5000,
-                    epsilon_min=0.00, epsilon_max=0.25, radius=0.5, goal_tolerance = 0.2,
+                    min_num_nodes=1500, max_num_nodes=7000,
+                    epsilon_min=0.00, epsilon_max=0.2, radius=0.75, goal_tolerance = 0.2,
                     obs_resolution=0.1, x_dim=self.x_dim, y_dim=self.y_dim, maneuvers=True)
 
                 path_x, path_y = rrt_star.path_planning()
@@ -145,7 +145,7 @@ class SequenceOfGoalsPlanner:
         # check if there is an empty path
         for i in range(len(self.optimized_paths)):
             if len(self.optimized_paths[i]) == 0:
-                self.optimized_paths[i] = copy.deepcopy(paths[i])
+                self.optimized_paths[i] = copy.deepcopy(self.usual_paths[i])
 
     def departure_angle(self, first_x, first_y, second_x, second_y):
         """ return the start angle"""

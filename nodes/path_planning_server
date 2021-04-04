@@ -50,9 +50,14 @@ class SeqGoalsPlannerServer:
                  "Goal %d: ( x , y, yaw) = ( %f , %f , %f )" % (
                      i, goals_list[i][0], goals_list[i][1], math.degrees(goals_list[i][2])))
 
+        planner = GlobalPathPlanner(start_pose=start_pose,
+                                    final_pose=final_pose,
+                                    goals_list=goals_list,
+                                    global_map=self.global_costmap,
+                                    x_dim=10.0,
+                                    y_dim=10.0)
 
-        planner = GlobalPathPlanner(start_pose=start_pose, global_map=self.global_costmap, final_pose=final_pose)
-        paths = planner.global_path_planner(goals_list)
+        paths = planner.get_optimized_paths()
 
         result = PathArray()
 

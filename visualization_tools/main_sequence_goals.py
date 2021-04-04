@@ -3,22 +3,13 @@
 # NEW CONCEPT
 import numpy as np
 import math
-import pylab
-import matplotlib.pyplot as plt
 import copy
 
 from goals_sequence_path_planner.global_path_planner import SequenceOfGoalsPlanner
-from world import make_world
-
-from helper_visual_functions import bspline, get_arrow_pose
+from plot_functions import *
 
 PI = math.pi
 
-colors = ["green", "blue", "red", "orange", "black"]
-
-# Arrow Pose
-arrow_width = 0.05
-arrow_length = 0.3
 
 def main():
 
@@ -81,7 +72,7 @@ def main():
     doa_angles = planner.get_doa_angles()
 
     # Plot
-    plot_paths(paths, scatter=True)
+    plot_paths(paths)
     plot_dod_doa(paths, dod_angles, doa_angles)
     
     # Start Pose
@@ -89,6 +80,8 @@ def main():
 
     # Final Pose
     plot_pose(paths[-1][-1][0], paths[-1][-1][1], final_pose[2], 'orange')
+
+    plot_goals_position(paths)
 
     # --------------------
     # ----- FIGURE 2 -----
@@ -98,6 +91,12 @@ def main():
 
     opt_paths = planner.get_optimized_paths()
     plot_paths(opt_paths)
+
+    # Start Pose
+    plot_pose(start_pose[0], start_pose[1], start_pose[2], 'purple')
+
+    # Final Pose
+    plot_pose(opt_paths[-1][-1][0], opt_paths[-1][-1][1], final_pose[2], 'orange')
 
     # --------------------
     # ----- FIGURE 3 -----
@@ -123,41 +122,53 @@ def main():
     # x, y = p.T
     # plt.plot(x, y, color=colors[i])
 
-def plot_paths(paths, scatter=False):
-    for i in range(len(paths)):
-        x = list()
-        y = list()
-        for j in range(len(paths[i])):
-            x.append(paths[i][j][0])
-            y.append(paths[i][j][1])
+# def plot_paths(paths, scatter=False):
+#     for i in range(len(paths)):
+#         x = list()
+#         y = list()
+#         for j in range(len(paths[i])):
+#             x.append(paths[i][j][0])
+#             y.append(paths[i][j][1])
         
-        # Plot
-        plt.plot(x,y, color=colors[i])
+#         # Plot
+#         plt.plot(x,y, color=colors[i])
 
-        # Scatter
-        if scatter:
-            plt.scatter(x, y, color=colors[i])
+#         # Scatter
+#         if scatter:
+#             plt.scatter(x, y, color=colors[i])
 
-def plot_dod_doa(paths, dod_angles, doa_angles):
-    for i in range(len(dod_angles)):
-        x = paths[i][-1][0]
-        y = paths[i][-1][1]
+# def plot_dod_doa(paths, dod_angles, doa_angles):
+#     for i in range(len(dod_angles)):
+#         x = paths[i][-1][0]
+#         y = paths[i][-1][1]
 
-        # DOA
-        doa = doa_angles[i]
-        plot_pose(x, y, doa, 'red')
+#         # DOA
+#         doa = doa_angles[i]
+#         plot_pose(x, y, doa, 'red')
 
-        # DOD
-        dod = dod_angles[i]
-        plot_pose(x, y, dod, 'brown')
+#         # DOD
+#         dod = dod_angles[i]
+#         plot_pose(x, y, dod, 'black')
 
-def make_new_world():
-    grid_map, graph = make_world()
-    return grid_map
+# def make_new_world():
+#     grid_map, graph = make_world()
+#     return grid_map
 
-def plot_pose(x, y, yaw, color):
-    endx, endy = get_arrow_pose(x, y, yaw, arrow_length=0.3)
-    pylab.arrow(x, y, endx, endy, width=arrow_width, color=color)
+# def plot_pose(x, y, yaw, color):
+#     endx, endy = get_arrow_pose(x, y, yaw, arrow_length=0.3)
+#     pylab.arrow(x, y, endx, endy, width=arrow_width, color=color)
+
+# def plot_goals_position(paths):
+#     x = list()
+#     y = list()
+#     for i in range(len(paths) - 1):
+#         x.append(paths[i][-1][0])
+#         y.append(paths[i][-1][1])
+
+#     plt.scatter(x, y, color='black')
+
+# def plot_virtual_obs(goals):
+#     pass
 
 if __name__ == "__main__":
     main()
