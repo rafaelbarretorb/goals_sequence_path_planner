@@ -2,7 +2,7 @@
 
 from scipy import interpolate
 
-from rrt_star import RRT_Star
+from rrt_star_smart_dual_tree import RRT_Star
 from helper_functions import dist, aim_to_point
 
 import numpy as np
@@ -66,7 +66,6 @@ class SequenceOfGoalsPlanner:
         # paths with proposed method
         self.optimized_planning(points)
 
-
     def usual_planning(self):
 
         points = self.goals_list[:]
@@ -81,12 +80,21 @@ class SequenceOfGoalsPlanner:
         for i in range(len(points) - 1):
             path = list()
             # make RRT* Path Planning
-            rrt_star = RRT_Star(start_point=points[i], goal_point=points[i+1], grid=self.global_map,
-                min_num_nodes=1500, max_num_nodes=7000,
-                epsilon_min=0.00, epsilon_max=0.2, radius=0.75, goal_tolerance=0.2,
-                obs_resolution=0.1, x_dim=self.x_dim, y_dim=self.y_dim, maneuvers=False)
+            planner = RRTStarSmartDualTree(start_point=points[i],
+                                           goal_point=points[i+1],
+                                           grid=self.global_map,
+                                           min_num_nodes=1000,
+                                           max_num_nodes=2000,
+                                           goal_tolerance=0.2,
+                                           epsilon=0.5,
+                                           optimization_radius=1.0
+                                           obs_resolution=0.1,
+				                           biasing_ratio=50,
+                                           x_dimension=10.0,
+                                           y_dimension=10.0,
+                                           maneuvers=False)
 
-            path_x, path_y = rrt_star.path_planning()
+            path_x, path_y = planner.path_planning()
             
             # Change the goal positions
             if i < len(points) - 1:
@@ -114,16 +122,23 @@ class SequenceOfGoalsPlanner:
             if points[i+1][3] == False:
                 self.optimized_paths.append([])
             else:
-
                 path = list()
-                
                 # TODO Limit time (max 10 secs example) 
-                rrt_star = RRT_Star(start_point=points[i], goal_point=points[i+1], grid=self.global_map,
-                    min_num_nodes=1500, max_num_nodes=7000,
-                    epsilon_min=0.00, epsilon_max=0.2, radius=0.75, goal_tolerance = 0.2,
-                    obs_resolution=0.1, x_dim=self.x_dim, y_dim=self.y_dim, maneuvers=True)
+                planner = RRTStarSmartDualTree(start_point=points[i],
+                                               goal_point=points[i+1],
+                                               grid=self.global_map,
+                                               min_num_nodes=1000,
+                                               max_num_nodes=2000,
+                                               goal_tolerance=0.2,
+                                               epsilon=0.5,
+                                               optimization_radius=1.0
+                                               obs_resolution=0.1,
+                                               biasing_ratio=50,
+                                               x_dimension=10.0,
+                                               y_dimension=10.0,
+                                               maneuvers=True)
 
-                path_x, path_y = rrt_star.path_planning()
+                path_x, path_y = planner.path_planning()
 
                 if len(path_x) != 0:
 
