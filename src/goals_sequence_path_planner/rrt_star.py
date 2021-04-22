@@ -33,7 +33,7 @@ class RRT_Star:
         self.x_dim = x_dim
         self.y_dim = y_dim
 
-        self.radius = 0.0
+        self.radius = 1.0
         self.k = 20.0
         self.goal_tolerance = goal_tolerance
 
