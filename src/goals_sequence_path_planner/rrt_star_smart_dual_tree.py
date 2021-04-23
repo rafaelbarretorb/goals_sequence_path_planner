@@ -3,10 +3,9 @@
 import pygame
 import sys
 
-from constants import GREEN, RED, BLACK, WHITE, GRAY
 from tree import Tree
 
-from obstacles import Obstacles
+from maneuver_bubble import Maneuver
 
 
 class RRTStarSmartDualTree:
@@ -21,43 +20,53 @@ class RRTStarSmartDualTree:
 				 epsilon,
 				 optimization_radius,
                  obs_resolution,
+				 biasing_radius,
 				 biasing_ratio,
 				 x_dimension,
 				 y_dimension,
-				 maneuvers=False):
-
-		self.obs_resolution = obs_resolution
-
+				 virtual_obstacles=False):
 		self.start_point = start_point
 		self.goal_point = goal_point
-
+		self.grid = grid
 		self.max_num_nodes = max_num_nodes
 		self.min_num_nodes = min_num_nodes
-		self.epsilon = epsilon
-
 		self.goal_tolerance = goal_tolerance
+		self.epsilon = epsilon
+		self.optimization_radius = optimization_radius
+		self.obs_resolution = obs_resolution
+		self.biasing_radius = biasing_radius
+		self.biasing_ratio = biasing_ratio
+		self.x_dim = x_dim
+		self.y_dim = y_dim
+		self.virtual_obstacles = virtual_obstacles
 
-		self.start_tree = Tree(True,
-								start_point,
-								goal_tolerance=20,
-								epsilon_min=epsilon_min,
-								epsilon_max=epsilon_max,
-								max_num_nodes=5000,
-								screen=self.screen,
-								obstacles=self.obstacles,
-								obs_resolution=self.obs_resolution,
-								biasing_radius=20.0)
+		# Tree starting at start point
+		self.start_tree = Tree(is_start_tree=True,
+							   start_point=self.start_point,
+							   grid=self.grid,
+							   goal_tolerance=self.goal_tolerance,
+							   epsilon=self.epsilon,
+							   max_num_nodes=self.max_num_nodes,
+							   obs_resolution=self.obs_resolution,
+							   optimization_radius=self.optimization_radius,
+							   x_dim=self.x_dim,
+							   y_dim=self.y_dim,
+							   biasing_radius = self.biasing_radius,
+							   virtual_obstacles=self.virtual_obstacles)
 
-		self.goal_tree = Tree(False,
-								goal_point,
-								goal_tolerance=20,
-								epsilon_min=epsilon_min,
-								epsilon_max=epsilon_max,
-								max_num_nodes=5000,
-								screen=self.screen,
-								obstacles=self.obstacles,
-								obs_resolution=self.obs_resolution,
-								biasing_radius=20.0)
+		# Tree starting at goal point
+		self.goal_tree = Tree(is_start_tree=False,
+							  start_point=goal_point,
+							  grid=self.grid,
+							  goal_tolerance=self.goal_tolerance,
+							  epsilon=self.epsilon,
+							  max_num_nodes=self.max_num_nodes,
+							  obs_resolution=self.obs_resolution,
+							  optimization_radius=self.optimization_radius,
+							  x_dim=self.x_dim,
+							  y_dim=self.y_dim,
+							  biasing_radius = self.biasing_radius,
+							  virtual_obstacles=self.virtual_obstacles)
 
 		self.tree = None
 
@@ -65,7 +74,6 @@ class RRTStarSmartDualTree:
 
 		self.n = None  # iteration where initial path found
 		self.it = 0
-		self.biasing_ratio = biasing_ratio
 
 	def valid_start_and_goal(self):
 		""" ."""
@@ -79,6 +87,7 @@ class RRTStarSmartDualTree:
 		""" ."""
 		j = 1
 		first_path_computed = False
+		path = list()
 		while self.keep_searching():
 			if self.n != None and self.it == (self.n + j*self.biasing_ratio):
 				self.tree.grow_tree(random_sample=False)
@@ -136,9 +145,9 @@ class RRTStarSmartDualTree:
 
 	def keep_searching(self):
 		""" ."""
-		start_size = self.start_tree.get_nodes_length()
-		goal_size = self.goal_tree.get_nodes_length()
-		if start_size > self.max_num_nodes or goal_size > self.max_num_nodes:
+		start_tree_size = self.start_tree.get_nodes_length()
+		goal_tree_size = self.goal_tree.get_nodes_length()
+		if start_tree_size > self.max_num_nodes or goal_tree_size > self.max_num_nodes:
 			return False
 		else:
 			return True

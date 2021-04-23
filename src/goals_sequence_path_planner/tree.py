@@ -10,13 +10,16 @@ class Tree:
 	def __init__(self,
 	             is_start_tree,
 				 start_point,
+				 grid,
 				 goal_tolerance,
 				 epsilon,
 				 max_num_nodes,
 				 obs_resolution,
 				 optimization_radius,
-				 biasing_radius=None):
-		""" ."""
+				 x_dim,
+				 y_dim,
+				 biasing_radius=None,
+				 virtual_obstacles=False):
 		self.is_start_tree = is_start_tree
 		self.start_point = start_point
 		self.goal_tolerance = goal_tolerance
@@ -25,6 +28,7 @@ class Tree:
 		self.obs_resolution = obs_resolution
 		self.optimization_radius = optimization_radius
 		self.biasing_radius = biasing_radius
+		self.virtual_obstacles = virtual_obstacles
 
 		# RRT*-Smart Beacons
 		self.beacons = list()
@@ -41,9 +45,35 @@ class Tree:
 		self.tree_blocked = False
 		self.path_old = list()
 
-		self.valid_start_and_goal()
 
+		virtual_obs_radius = 0.5
+		virtual_obs_tolerance = 0.05
 
+        if self.virtual_obstacles:
+            self.start_maneuver = Maneuver(self.start_point[0],
+										   self.start_point[1],
+										   self.start_point[2],
+                                           virtual_obs_tolerance,
+										   virtual_obs_radius,
+										   pose_status_goal=False)
+
+            self.goal_maneuver = Maneuver(self.goal_point[0],
+										  self.goal_point[1],
+										  self.goal_point[2],
+                                          virtual_obs_tolerance,
+										  virtual_obs_radius,
+										  pose_status_goal=True)   
+
+    def make_maneuver(self, x, y):
+		""" ."""
+
+        if not self.maneuvers:
+            return True
+        else:
+            if self.start_maneuver.is_this_point_allowed(x, y) and self.goal_maneuver.is_this_point_allowed(x, y):
+                return True
+            else:
+                return False
 
 	def get_nodes_length(self):
 		""" ."""
@@ -154,11 +184,13 @@ class Tree:
 		"""
 		for i in range(1000):
 			if not random_sample:
-				x_rand = int(beacon_point[0] + self.biasing_radius * 2 * (random.random() - 0.5))
-				y_rand = int(beacon_point[1] + self.biasing_radius * 2 * (random.random() - 0.5))
-				p_rand = x_rand, y_rand
+				x_rand = beacon_point[0] + self.biasing_radius * 2 * (random.random() - 0.5)
+				y_rand = beacon_point[1] + self.biasing_radius * 2 * (random.random() - 0.5)
 			else:
-				p_rand = int((random.random())*500), int((random.random())*500)
+				x_rand = (random.random() - 0.5) * self.x_dim 
+				y_rand = (random.random() - 0.5) * self.y_dim 
+				
+			p_rand = x_rand, y_rand
 
 			# Check collision
 			if not self.collision(p_rand):
@@ -306,9 +338,76 @@ class Tree:
 	
 		return self.compute_path()
 
-	def collision(self, p):
-		""" Check if the point p is located inside some obstacle."""
-		return self.obstacles.check_collision(p[0], p[1])
+    def collision(self, p):  # check if point collides with the obstacle
+        """ Check if the point p is located in a occupied cell."""
+        cell_row, cell_col = self.world_to_map(p[0], p[1])
+
+        if type(self.grid) == np.ndarray:
+            if cell_col < 0:
+                return True
+            elif cell_row < 0:
+                return True
+            elif cell_row - 1 < 0:
+                return True
+            elif cell_col - 1 < 0:
+                return True
+            elif cell_col >= self.grid.shape[1]:
+                return True
+            elif cell_row >= self.grid.shape[0]:
+                return True
+            elif cell_col + 1 >= self.grid.shape[1]:
+                return True
+            elif cell_row +1>= self.grid.shape[0]:
+                return True
+            elif self.grid[cell_row][cell_col] == 1:
+                return True
+            elif self.grid[cell_row+1][cell_col+1] == 1:
+                return True
+            elif self.grid[cell_row][cell_col+1] == 1:
+                return True
+            elif self.grid[cell_row+1][cell_col] == 1:
+                return True
+            elif self.grid[cell_row-1][cell_col] == 1:
+                return True
+            elif self.grid[cell_row][cell_col-1] == 1:
+                return True
+            elif self.grid[cell_row-1][cell_col-1] == 1:
+                return True
+            else:
+                return False
+        else:
+            # ROS nav_msgs/OccupancyGrid Message
+            index = cell_col + self.grid.info.width*cell_row
+
+            if cell_col < 0:
+                return True
+            elif cell_row < 0:
+                return True
+            elif cell_row - 1 < 0:
+                return True
+            elif cell_col -1 < 0:
+                return True
+            elif cell_col >= self.grid.info.width:
+                return True
+            elif cell_row >= self.grid.info.height:
+                return True
+            elif self.grid.data[index] > 1:
+                return True
+            else:
+                return False
+
+    def world_to_map(self, x, y):
+        """ get the cell coord of the center point of the robot"""
+		# TODO Improve
+        if type(self.grid) == np.ndarray:
+            cell_col = int((x - (-5.0)) / 0.2)
+            cell_row = int((-y - (-5.0)) / 0.2) 
+        else:
+            # ROS nav_msgs/OccupancyGrid Message
+            cell_col = int(round((x - self.grid.info.origin.position.x) / self.grid.info.resolution))
+            cell_row = int(round((y - self.grid.info.origin.position.y) / self.grid.info.resolution))
+
+        return cell_row, cell_col
 
 	def step_n_from_p1_to_p2(self, p1, p2, n):
 		""" ."""
@@ -328,7 +427,7 @@ class Tree:
 		else:
 			for i in range(int(math.floor(distance/self.obs_resolution))):
 				p_i = self.step_n_from_p1_to_p2(p1, p2, i + 1)
-				if self.collision(p_i):
+				if self.collision(p_i) or not self.make_maneuver(p_i[0], p_i[1]):
 					return False
 
 			return True
