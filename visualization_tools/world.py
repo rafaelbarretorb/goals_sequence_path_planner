@@ -7,10 +7,7 @@ CELL_DIM = 0.2
 grid_height = int(2*SQUARE_DIM/CELL_DIM)
 grid_width = grid_height
 
-
 import numpy as np
-RADIUS = 1.0
-
 
 SQUARE_DIM = 5
 CELL_DIM = 0.2
@@ -22,12 +19,16 @@ grid =  np.zeros([grid_height, grid_width])
 
 def make_world():
 
+    print "TEST1"
+
     fig = plt.figure(figsize=(7,7))
 
     plt.xlim(-SQUARE_DIM, SQUARE_DIM)
     plt.ylim(-SQUARE_DIM, SQUARE_DIM)
 
     ax = fig.add_subplot(1, 1, 1)
+
+    print "TEST2"
 
     # # Major ticks every 20, minor ticks every 5
     # major_ticks = np.arange(-SQUARE_DIM, SQUARE_DIM, 1)

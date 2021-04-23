@@ -5,21 +5,15 @@ import math
 
 PI = math.pi
 
-def dist(x1, y1, x2, y2):    
-    """ Compute the Euclidean distance between two points in the plane.
-
+def dist(p1, p2):    
+    """ Class method for compute the distance between two points.
     Args:
-        x1: x first point
-        y1: y first point
-        x2: x second point
-        y2: y second point
-
+        p1: Point 1 tuple.
+        p2: Poinf 2 tuple.
     Returns:
-        The distance between two points in cartesian plan.
-
+        The distance between two points the in cartesian plan.
     """
-    distance = math.sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2))
-    return distance
+    return math.sqrt((p1[0]-p2[0])*(p1[0]-p2[0])+(p1[1]-p2[1])*(p1[1]-p2[1]))
 
 def aim_to_point(current_x, current_y, target_x, target_y):
     """ Return the yaw angle of a current point (heading) pointed 

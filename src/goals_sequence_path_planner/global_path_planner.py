@@ -2,7 +2,7 @@
 
 from scipy import interpolate
 
-from rrt_star_smart_dual_tree import RRT_Star
+from rrt_star_smart_dual_tree import RRTStarSmartDualTree
 from helper_functions import dist, aim_to_point
 
 import numpy as np
@@ -87,7 +87,7 @@ class SequenceOfGoalsPlanner:
                                            max_num_nodes=2000,
                                            goal_tolerance=0.2,
                                            epsilon=0.5,
-                                           optimization_radius=1.0
+                                           optimization_radius=1.0,
                                            obs_resolution=0.1,
 				                           biasing_ratio=50,
                                            x_dimension=10.0,
@@ -131,7 +131,7 @@ class SequenceOfGoalsPlanner:
                                                max_num_nodes=2000,
                                                goal_tolerance=0.2,
                                                epsilon=0.5,
-                                               optimization_radius=1.0
+                                               optimization_radius=1.0,
                                                obs_resolution=0.1,
                                                biasing_ratio=50,
                                                x_dimension=10.0,

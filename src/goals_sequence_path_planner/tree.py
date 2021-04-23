@@ -4,12 +4,15 @@ import random
 from helper_functions import * # dist
 from node import Node
 import sys
+from maneuver_bubble import Maneuver
+import numpy as np
 
 
 class Tree:
 	def __init__(self,
 	             is_start_tree,
 				 start_point,
+				 start_point_other_tree,
 				 grid,
 				 goal_tolerance,
 				 epsilon,
@@ -22,11 +25,17 @@ class Tree:
 				 virtual_obstacles=False):
 		self.is_start_tree = is_start_tree
 		self.start_point = start_point
+
+		# TODO Improve This
+		self.goal_point = start_point_other_tree
+		self.grid = grid
 		self.goal_tolerance = goal_tolerance
 		self.epsilon = epsilon
 		self.max_num_nodes = max_num_nodes
 		self.obs_resolution = obs_resolution
 		self.optimization_radius = optimization_radius
+		self.x_dim = x_dim	
+		self.y_dim = y_dim
 		self.biasing_radius = biasing_radius
 		self.virtual_obstacles = virtual_obstacles
 
@@ -49,31 +58,39 @@ class Tree:
 		virtual_obs_radius = 0.5
 		virtual_obs_tolerance = 0.05
 
-        if self.virtual_obstacles:
-            self.start_maneuver = Maneuver(self.start_point[0],
-										   self.start_point[1],
-										   self.start_point[2],
-                                           virtual_obs_tolerance,
-										   virtual_obs_radius,
-										   pose_status_goal=False)
+		# TODO Improve this shit
+		if not self.is_start_tree:
+			start_virtual_obs = True
+			goal_virtual_obs = False
+		else:
+			start_virtual_obs = False
+			goal_virtual_obs = True
 
-            self.goal_maneuver = Maneuver(self.goal_point[0],
-										  self.goal_point[1],
-										  self.goal_point[2],
-                                          virtual_obs_tolerance,
-										  virtual_obs_radius,
-										  pose_status_goal=True)   
+		if self.virtual_obstacles:
+			self.start_maneuver = Maneuver(self.start_point[0],
+											self.start_point[1],
+											self.start_point[2],
+											virtual_obs_tolerance,
+											virtual_obs_radius,
+											pose_status_goal=start_virtual_obs)
 
-    def make_maneuver(self, x, y):
+			self.goal_maneuver = Maneuver(self.goal_point[0],
+											self.goal_point[1],
+											self.goal_point[2],
+											virtual_obs_tolerance,
+											virtual_obs_radius,
+											pose_status_goal=goal_virtual_obs)   
+
+	def make_maneuver(self, x, y):
 		""" ."""
 
-        if not self.maneuvers:
-            return True
-        else:
-            if self.start_maneuver.is_this_point_allowed(x, y) and self.goal_maneuver.is_this_point_allowed(x, y):
-                return True
-            else:
-                return False
+		if not self.virtual_obstacles:
+			return True
+		else:
+			if self.start_maneuver.is_this_point_allowed(x, y) and self.goal_maneuver.is_this_point_allowed(x, y):
+				return True
+			else:
+				return False
 
 	def get_nodes_length(self):
 		""" ."""
@@ -102,9 +119,6 @@ class Tree:
 	def rewire(self, new_node):
 		""" ."""
 		for node in self.nodes:
-			# Draw node node TODO ???
-			self.draw_node(node.point)
-
 			# new_node parent
 			new_n_p = new_node.parent
 
@@ -116,25 +130,12 @@ class Tree:
 
 			if node != new_n_p and d < self.optimization_radius and cost_new_n_2_n < node.cost:
 				if self.obstacle_free(node.point, new_node.point):
-					# Delete, paint white
-					self.erase_connection(node.point, node.parent.point)
-
 					# Now the node parent is the new node
 					node.parent = new_node
-					node.cost = new_node.cost + dist(node.point, new_node.point)
-					
-					# Draw
-					self.draw_connection(node.point, new_node.point)
-					
-			else:
-				if node.parent != None:
-					self.draw_connection(node.point, node.parent.point)
-
-		pygame.display.update()
+					node.cost = new_node.cost + dist(node.point, new_node.point)				
 
 	def grow_tree(self, random_sample=True, samples_per_beacon=5):
 		""" ."""
-		time.sleep(0.01)
 		found_next = False
 		if random_sample:
 			while found_next == False:
@@ -150,7 +151,7 @@ class Tree:
 					found_next = False
 					while found_next == False:
 						p_rand = self.sample_free(random_sample=False, beacon_point=beacon.point)
-						if self.found_next_node(p_rand:
+						if self.found_next_node(p_rand):
 							found_next = True
 
 	def found_next_node(self, random_point):
@@ -201,11 +202,11 @@ class Tree:
 	def steer(self, p1, p2):
 		""" ."""
 		distance = dist(p1,p2)
-		if distance < self.epsilon_max and distance > self.epsilon_min:
+		if distance < self.epsilon:
 			return p2
 		else:
 			theta = math.atan2(p2[1]-p1[1],p2[0]-p1[0])
-			return int(p1[0] + self.epsilon_max*math.cos(theta)), int(p1[1] + self.epsilon_max*math.sin(theta))
+			return int(p1[0] + self.epsilon*math.cos(theta)), int(p1[1] + self.epsilon*math.sin(theta))
 
 	def get_nearest(self, p_rand):
 		""" Returns the nearest node of the list."""
@@ -298,8 +299,6 @@ class Tree:
 		path.insert(0, current_node.point)
 		self.beacons.insert(0, current_node)
 
-		self.draw_current_path(path)
-
 		if not self.is_start_tree_the_last():
 			path.reverse()
 		
@@ -338,76 +337,76 @@ class Tree:
 	
 		return self.compute_path()
 
-    def collision(self, p):  # check if point collides with the obstacle
-        """ Check if the point p is located in a occupied cell."""
-        cell_row, cell_col = self.world_to_map(p[0], p[1])
+	def collision(self, p):  # check if point collides with the obstacle
+		""" Check if the point p is located in a occupied cell."""
+		cell_row, cell_col = self.world_to_map(p[0], p[1])
 
-        if type(self.grid) == np.ndarray:
-            if cell_col < 0:
-                return True
-            elif cell_row < 0:
-                return True
-            elif cell_row - 1 < 0:
-                return True
-            elif cell_col - 1 < 0:
-                return True
-            elif cell_col >= self.grid.shape[1]:
-                return True
-            elif cell_row >= self.grid.shape[0]:
-                return True
-            elif cell_col + 1 >= self.grid.shape[1]:
-                return True
-            elif cell_row +1>= self.grid.shape[0]:
-                return True
-            elif self.grid[cell_row][cell_col] == 1:
-                return True
-            elif self.grid[cell_row+1][cell_col+1] == 1:
-                return True
-            elif self.grid[cell_row][cell_col+1] == 1:
-                return True
-            elif self.grid[cell_row+1][cell_col] == 1:
-                return True
-            elif self.grid[cell_row-1][cell_col] == 1:
-                return True
-            elif self.grid[cell_row][cell_col-1] == 1:
-                return True
-            elif self.grid[cell_row-1][cell_col-1] == 1:
-                return True
-            else:
-                return False
-        else:
-            # ROS nav_msgs/OccupancyGrid Message
-            index = cell_col + self.grid.info.width*cell_row
+		if type(self.grid) == np.ndarray:
+			if cell_col < 0:
+				return True
+			elif cell_row < 0:
+				return True
+			elif cell_row - 1 < 0:
+				return True
+			elif cell_col - 1 < 0:
+				return True
+			elif cell_col >= self.grid.shape[1]:
+				return True
+			elif cell_row >= self.grid.shape[0]:
+				return True
+			elif cell_col + 1 >= self.grid.shape[1]:
+				return True
+			elif cell_row +1>= self.grid.shape[0]:
+				return True
+			elif self.grid[cell_row][cell_col] == 1:
+				return True
+			elif self.grid[cell_row+1][cell_col+1] == 1:
+				return True
+			elif self.grid[cell_row][cell_col+1] == 1:
+				return True
+			elif self.grid[cell_row+1][cell_col] == 1:
+				return True
+			elif self.grid[cell_row-1][cell_col] == 1:
+				return True
+			elif self.grid[cell_row][cell_col-1] == 1:
+				return True
+			elif self.grid[cell_row-1][cell_col-1] == 1:
+				return True
+			else:
+				return False
+		else:
+			# ROS nav_msgs/OccupancyGrid Message
+			index = cell_col + self.grid.info.width*cell_row
 
-            if cell_col < 0:
-                return True
-            elif cell_row < 0:
-                return True
-            elif cell_row - 1 < 0:
-                return True
-            elif cell_col -1 < 0:
-                return True
-            elif cell_col >= self.grid.info.width:
-                return True
-            elif cell_row >= self.grid.info.height:
-                return True
-            elif self.grid.data[index] > 1:
-                return True
-            else:
-                return False
+			if cell_col < 0:
+				return True
+			elif cell_row < 0:
+				return True
+			elif cell_row - 1 < 0:
+				return True
+			elif cell_col -1 < 0:
+				return True
+			elif cell_col >= self.grid.info.width:
+				return True
+			elif cell_row >= self.grid.info.height:
+				return True
+			elif self.grid.data[index] > 1:
+				return True
+			else:
+				return False
 
-    def world_to_map(self, x, y):
-        """ get the cell coord of the center point of the robot"""
+	def world_to_map(self, x, y):
+		""" get the cell coord of the center point of the robot"""
 		# TODO Improve
-        if type(self.grid) == np.ndarray:
-            cell_col = int((x - (-5.0)) / 0.2)
-            cell_row = int((-y - (-5.0)) / 0.2) 
-        else:
-            # ROS nav_msgs/OccupancyGrid Message
-            cell_col = int(round((x - self.grid.info.origin.position.x) / self.grid.info.resolution))
-            cell_row = int(round((y - self.grid.info.origin.position.y) / self.grid.info.resolution))
+		if type(self.grid) == np.ndarray:
+			cell_col = int((x - (-5.0)) / 0.2)
+			cell_row = int((-y - (-5.0)) / 0.2) 
+		else:
+			# ROS nav_msgs/OccupancyGrid Message
+			cell_col = int(round((x - self.grid.info.origin.position.x) / self.grid.info.resolution))
+			cell_row = int(round((y - self.grid.info.origin.position.y) / self.grid.info.resolution))
 
-        return cell_row, cell_col
+		return cell_row, cell_col
 
 	def step_n_from_p1_to_p2(self, p1, p2, n):
 		""" ."""

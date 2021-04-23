@@ -22,8 +22,8 @@ class RRTStarSmartDualTree:
                  obs_resolution,
 				 biasing_radius,
 				 biasing_ratio,
-				 x_dimension,
-				 y_dimension,
+				 x_dim,
+				 y_dim,
 				 virtual_obstacles=False):
 		self.start_point = start_point
 		self.goal_point = goal_point
@@ -43,6 +43,7 @@ class RRTStarSmartDualTree:
 		# Tree starting at start point
 		self.start_tree = Tree(is_start_tree=True,
 							   start_point=self.start_point,
+							   start_point_other_tree=self.goal_point,
 							   grid=self.grid,
 							   goal_tolerance=self.goal_tolerance,
 							   epsilon=self.epsilon,
@@ -56,7 +57,8 @@ class RRTStarSmartDualTree:
 
 		# Tree starting at goal point
 		self.goal_tree = Tree(is_start_tree=False,
-							  start_point=goal_point,
+							  start_point=self.goal_point,
+							  start_point_other_tree=self.start_point,
 							  grid=self.grid,
 							  goal_tolerance=self.goal_tolerance,
 							  epsilon=self.epsilon,
@@ -77,11 +79,11 @@ class RRTStarSmartDualTree:
 
 	def valid_start_and_goal(self):
 		""" ."""
-        if self.start_tree.collision(self.start_point):
-            sys.exit("ERROR!!!!. Start Position is not allowed.")
+		if self.start_tree.collision(self.start_point):
+			sys.exit("ERROR!!!!. Start Position is not allowed.")
 
-        if self.goal_tree.collision(self.goal_point):
-            sys.exit("ERROR!!!!. Goal Position is not allowed.")
+		if self.goal_tree.collision(self.goal_point):
+			sys.exit("ERROR!!!!. Goal Position is not allowed.")
 
 	def planning(self):
 		""" ."""
