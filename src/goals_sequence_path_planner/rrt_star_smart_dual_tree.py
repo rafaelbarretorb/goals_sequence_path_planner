@@ -5,7 +5,7 @@ import sys
 
 from tree import Tree
 
-from maneuver_bubble import Maneuver
+from virtual_obstacle import VirtualObstacle
 
 
 class RRTStarSmartDualTree:

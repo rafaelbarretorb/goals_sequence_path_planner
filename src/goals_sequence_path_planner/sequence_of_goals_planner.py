@@ -18,24 +18,44 @@ class SequenceOfGoalsPlanner:
     """
     """
 
-    def __init__(self, start_pose, final_pose, goals_list, global_map, x_dim, y_dim):
+    def __init__(self,
+                 start_pose,
+                 final_pose,
+                 goals_list,
+                 global_map,
+                 min_num_nodes,
+                 max_num_nodes,
+                 goal_tolerance,
+                 epsilon,
+                 optimization_radius,
+                 obs_resolution,
+                 biasing_radius,
+                 biasing_ratio,
+                 x_dim,
+                 y_dim):
+		self.start_pose = start_pose
+		self.final_pose = final_pose
+		self.goals_list = goals_list
+		self.global_map = global_map
+		self.max_num_nodes = max_num_nodes
+		self.min_num_nodes = min_num_nodes
+		self.goal_tolerance = goal_tolerance
+		self.epsilon = epsilon
+		self.optimization_radius = optimization_radius
+		self.obs_resolution = obs_resolution
+		self.biasing_radius = biasing_radius
+		self.biasing_ratio = biasing_ratio
+		self.x_dim = x_dim
+		self.y_dim = y_dim
 
-        self.start_pose = start_pose
-        self.final_pose = final_pose
-        self.goals_list = goals_list
-        self.global_map = global_map
+		self.dod_angles = list()
+		self.doa_angles = list()
+		self.result_directions = list()
 
-        self.x_dim = x_dim
-        self.y_dim = y_dim
+		self.usual_paths = list()
+		self.optimized_paths = list()
 
-        self.dod_angles = list()
-        self.doa_angles = list()
-        self.result_directions = list()
-
-        self.usual_paths = list()
-        self.optimized_paths = list()
-
-        self.run_planner()
+		self.run_planner()
 
     def run_planner(self):
 
@@ -78,89 +98,68 @@ class SequenceOfGoalsPlanner:
 
         # Compute all usual paths
         for i in range(len(points) - 1):
-            path = list()
-            # make RRT* Path Planning
-            planner = RRTStarSmartDualTree(start_point=points[i],
-                                           goal_point=points[i+1],
-                                           grid=self.global_map,
-                                           min_num_nodes=1000,
-                                           max_num_nodes=2000,
-                                           goal_tolerance=0.2,
-                                           epsilon=0.5,
-                                           optimization_radius=1.0,
-                                           obs_resolution=0.1,
-				                           biasing_ratio=50,
-                                           x_dimension=10.0,
-                                           y_dimension=10.0,
-                                           maneuvers=False)
+			path = list()
+			# make RRT* Path Planning
+			planner = RRTStarSmartDualTree(start_point=points[i],
+											goal_point=points[i+1],
+											grid=self.global_map,
+											min_num_nodes=self.min_num_nodes,
+											max_num_nodes=self.max_num_nodes,
+											goal_tolerance=self.goal_tolerance,
+											epsilon=self.epsilon,
+											optimization_radius=self.optimization_radius,
+											obs_resolution=self.obs_resolution,
+											biasing_radius=self.biasing_radius,
+											biasing_ratio=self.biasing_ratio,
+											x_dim=self.x_dim,
+											y_dim=self.y_dim,
+											virtual_obstacles=False)
 
-            path_x, path_y = planner.path_planning()
-            
-            # Change the goal positions
-            if i < len(points) - 1:
-                # print "i = " + str(i)
-                # print "points length: " + str(len(points))
-                # print "path length: " + str(len(path_x))
-                points[i+1][0] = path_x[-1]
-                points[i+1][1] = path_y[-1]
-
-            for j in range(len(path_x)):
-                path.append([path_x[j], path_y[j]])
-
-            self.usual_paths.append(path)
-        
+			path = planner.planning()
+			self.usual_paths.append(path)
 
     def optimized_planning(self, points):
+		""" ."""
+		last_path_failed = False
+
+		# Compute all optimized paths
+		for i in range(len(points) - 1):
+			# Do not attempt optimize
+			# TODO ERROR, points[i][3] ???
+			if points[i+1][3] == False:
+				self.optimized_paths.append([])
+			else:
+				path = list()
+				# TODO Limit time (max 10 secs example) 
+				planner = RRTStarSmartDualTree(start_point=points[i],
+												goal_point=points[i+1],
+												grid=self.global_map,
+												min_num_nodes=self.min_num_nodes,
+												max_num_nodes=self.max_num_nodes,
+												goal_tolerance=self.goal_tolerance,
+												epsilon=self.epsilon,
+												optimization_radius=self.optimization_radius,
+												obs_resolution=self.obs_resolution,
+												biasing_radius=self.biasing_radius,
+												biasing_ratio=self.biasing_ratio,
+												x_dim=self.x_dim,
+												y_dim=self.y_dim,
+												virtual_obstacles=True)
+
+				path = planner.planning()
+
+				if len(path) != 0:
+					self.optimized_paths.append(path)
+					last_path_failed = False
+				else:
+					print "Path " + str(i) + " failed!"
+					last_path_failed = True
+					self.optimized_paths.append([])
         
-
-        last_path_failed = False
-
-        # Compute all optimized paths
-        for i in range(len(points) - 1):
-            # Do not attempt optimize
-            # TODO ERROR, points[i][3] ???
-            if points[i+1][3] == False:
-                self.optimized_paths.append([])
-            else:
-                path = list()
-                # TODO Limit time (max 10 secs example) 
-                planner = RRTStarSmartDualTree(start_point=points[i],
-                                               goal_point=points[i+1],
-                                               grid=self.global_map,
-                                               min_num_nodes=1000,
-                                               max_num_nodes=2000,
-                                               goal_tolerance=0.2,
-                                               epsilon=0.5,
-                                               optimization_radius=1.0,
-                                               obs_resolution=0.1,
-                                               biasing_ratio=50,
-                                               x_dimension=10.0,
-                                               y_dimension=10.0,
-                                               maneuvers=True)
-
-                path_x, path_y = planner.path_planning()
-
-                if len(path_x) != 0:
-
-                    # Change the goal positions
-                    if i < len(points) - 1:
-                        points[i+1][0] = path_x[-1]
-                        points[i+1][1] = path_y[-1]
-
-                    for j in range(len(path_x)):
-                        path.append([path_x[j], path_y[j]])
-
-                    self.optimized_paths.append(path)
-                    last_path_failed = False
-                else:
-                    print "Path " + str(i) + " failed!"
-                    last_path_failed = True
-                    self.optimized_paths.append([])
-        
-        # check if there is an empty path
-        for i in range(len(self.optimized_paths)):
-            if len(self.optimized_paths[i]) == 0:
-                self.optimized_paths[i] = copy.deepcopy(self.usual_paths[i])
+		# check if there is an empty path
+		for i in range(len(self.optimized_paths)):
+			if len(self.optimized_paths[i]) == 0:
+				self.optimized_paths[i] = copy.deepcopy(self.usual_paths[i])
 
     def departure_angle(self, first_x, first_y, second_x, second_y):
         """ return the start angle"""

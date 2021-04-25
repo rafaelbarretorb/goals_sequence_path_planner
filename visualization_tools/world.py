@@ -18,17 +18,12 @@ grid =  np.zeros([grid_height, grid_width])
 # TODO add if risk_zone == True
 
 def make_world():
-
-    print "TEST1"
-
     fig = plt.figure(figsize=(7,7))
 
     plt.xlim(-SQUARE_DIM, SQUARE_DIM)
     plt.ylim(-SQUARE_DIM, SQUARE_DIM)
 
     ax = fig.add_subplot(1, 1, 1)
-
-    print "TEST2"
 
     # # Major ticks every 20, minor ticks every 5
     # major_ticks = np.arange(-SQUARE_DIM, SQUARE_DIM, 1)

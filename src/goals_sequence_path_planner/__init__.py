@@ -1,5 +1,5 @@
 #!/usr/bin/env python
 
-from .global_path_planner import *
-from .rrt_star import *
-from .maneuver_bubble import *
+from .sequence_of_goals_planner import *
+from .rrt_star_smart_dual_tree import *
+from .virtual_obstacle import *

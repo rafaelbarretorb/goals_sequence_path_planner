@@ -4,7 +4,7 @@ import random
 from helper_functions import * # dist
 from node import Node
 import sys
-from maneuver_bubble import Maneuver
+from virtual_obstacle import VirtualObstacle
 import numpy as np
 
 
@@ -60,34 +60,33 @@ class Tree:
 
 		# TODO Improve this shit
 		if not self.is_start_tree:
-			start_virtual_obs = True
+			start_virtual_obs = True  # 
 			goal_virtual_obs = False
 		else:
 			start_virtual_obs = False
 			goal_virtual_obs = True
 
 		if self.virtual_obstacles:
-			self.start_maneuver = Maneuver(self.start_point[0],
+			self.start_virtual_obstacle = VirtualObstacle(self.start_point[0],
 											self.start_point[1],
 											self.start_point[2],
 											virtual_obs_tolerance,
 											virtual_obs_radius,
 											pose_status_goal=start_virtual_obs)
 
-			self.goal_maneuver = Maneuver(self.goal_point[0],
+			self.goal_virtual_obstacle = VirtualObstacle(self.goal_point[0],
 											self.goal_point[1],
 											self.goal_point[2],
 											virtual_obs_tolerance,
 											virtual_obs_radius,
 											pose_status_goal=goal_virtual_obs)   
 
-	def make_maneuver(self, x, y):
+	def virtual_collision(self, x, y):
 		""" ."""
-
 		if not self.virtual_obstacles:
 			return True
 		else:
-			if self.start_maneuver.is_this_point_allowed(x, y) and self.goal_maneuver.is_this_point_allowed(x, y):
+			if self.start_virtual_obstacle.collision(x, y) and self.goal_virtual_obstacle.collision(x, y):
 				return True
 			else:
 				return False
@@ -280,6 +279,10 @@ class Tree:
 	def block_tree(self):
 		""" This tree does not grow anymore."""
 		self.tree_blocked = True
+		if self.is_start_tree:
+			print "Start Tree Blocked"
+		else:
+			print "Goal Tree Blocked"
 
 	def compute_path(self):
 		""" Compute the current path resultant of the
@@ -426,7 +429,7 @@ class Tree:
 		else:
 			for i in range(int(math.floor(distance/self.obs_resolution))):
 				p_i = self.step_n_from_p1_to_p2(p1, p2, i + 1)
-				if self.collision(p_i) or not self.make_maneuver(p_i[0], p_i[1]):
+				if self.collision(p_i) or not self.virtual_collision(p_i[0], p_i[1]):
 					return False
 
 			return True

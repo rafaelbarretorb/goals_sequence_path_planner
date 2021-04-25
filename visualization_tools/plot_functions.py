@@ -13,6 +13,7 @@ arrow_width = 0.05
 arrow_length = 0.3
 
 def plot_paths(paths, scatter=False):
+    print "Paths Length: " + str(len(paths))
     for i in range(len(paths)):
         x = list()
         y = list()

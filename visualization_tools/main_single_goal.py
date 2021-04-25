@@ -14,7 +14,7 @@ from helper_visual_functions import bspline, get_arrow_pose
 from datetime import datetime
 
 from goals_sequence_path_planner.rrt_star_smart_dual_tree import RRTStarSmartDualTree
-from goals_sequence_path_planner.maneuver_bubble import Maneuver
+from goals_sequence_path_planner.virtual_obstacle import VirtualObstacle
 
 now = datetime.now()
 PI = math.pi
@@ -38,13 +38,13 @@ planner = RRTStarSmartDualTree(start_point=start_pose,
 				               goal_point=goal_pose,
 				               grid=grid_map,
 				               min_num_nodes=1000,
-                               max_num_nodes=4000,
+                               max_num_nodes=2000,
                                goal_tolerance=goal_tolerance,
 				               epsilon=0.5,
-				               optimization_radius=0.5,
-                               obs_resolution=0.1,
+				               optimization_radius=1.0,
+                               obs_resolution=0.05,
 				               biasing_radius=1.0,
-				               biasing_ratio=50,
+				               biasing_ratio=20,
 				               x_dim=10.0,
 				               y_dim=10.0,
 				               virtual_obstacles=True)
@@ -66,20 +66,20 @@ plt.plot(path_x, path_y)
 maneuver_radius = 0.5
 
 # START Pose
-start_maneuver = Maneuver(start_pose[0], start_pose[1], start_pose[2], 0.05, maneuver_radius, False)
+start_virtual_obs = VirtualObstacle(start_pose[0], start_pose[1], start_pose[2], 0.05, maneuver_radius, False)
 
-x_start, y_start = start_maneuver.makeCenterCircle()
-x_start_right, y_start_right = start_maneuver.makeRightCircle()
-x_start_left, y_start_left = start_maneuver.makeLeftCircle()
-x_start_arc, y_start_arc = start_maneuver.makeArc()
+x_start, y_start = start_virtual_obs.make_center_circle()
+x_start_right, y_start_right = start_virtual_obs.make_right_circle()
+x_start_left, y_start_left = start_virtual_obs.make_left_circle()
+x_start_arc, y_start_arc = start_virtual_obs.make_arc()
 
 # GOAL Pose
-goal_maneuver = Maneuver(goal_pose[0], goal_pose[1], goal_pose[2], 0.05, maneuver_radius, True)
+goal_virtual_obs = VirtualObstacle(goal_pose[0], goal_pose[1], goal_pose[2], 0.05, maneuver_radius, True)
 
-x_goal, y_goal = goal_maneuver.makeCenterCircle()
-x_goal_right, y_goal_right = goal_maneuver.makeRightCircle()
-x_goal_left, y_goal_left = goal_maneuver.makeLeftCircle()
-x_goal_arc, y_goal_arc = goal_maneuver.makeArc()
+x_goal, y_goal = goal_virtual_obs.make_center_circle()
+x_goal_right, y_goal_right = goal_virtual_obs.make_right_circle()
+x_goal_left, y_goal_left = goal_virtual_obs.make_left_circle()
+x_goal_arc, y_goal_arc = goal_virtual_obs.make_arc()
 
 # Plot Start
 plt.plot(x_start,y_start)
