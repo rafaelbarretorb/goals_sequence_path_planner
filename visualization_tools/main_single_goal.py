@@ -9,7 +9,8 @@ import matplotlib.pyplot as plt
 import pylab
 import math
 
-from helper_visual_functions import bspline, get_arrow_pose
+from helper_visual_functions import get_arrow_pose, make_spline_curve
+from plot_functions import *
 
 from datetime import datetime
 
@@ -96,26 +97,20 @@ plt.plot(x_goal_left, y_goal_left, color=obs_color)
 plt.plot(x_goal_arc, y_goal_arc, color=obs_color)
 
 # difference = (later - now).total_seconds()
-########################################################
-##### SPLINE #####
-# data = list()
-# for i in range(len(path_x)):
-#   data.append([path_x[i], path_y[i]])
 
-# data = np.array(data)
-# p = bspline(data,n=100,degree=3)
-# x,y = p.T
-# plt.plot(x,y)
+# ------------------
+# ----- SPLINE -----
+# ------------------
+spline_curve = make_spline_curve(path, 0.5, 0.35)
+x, y = spline_curve.T
+plt.plot(x, y, color='purple')
 
-########################################################
-# Plot Start Pose
-start_endx, start_endy = get_arrow_pose(start_pose, arrow_length=0.3)
-pylab.arrow(start_pose[0], start_pose[1], start_endx, start_endy, width=0.05, color='red')
+spline_curve = make_spline_curve(path, 0.5, 0.35, False)
+x, y = spline_curve.T
+plt.plot(x, y, color='orange')
 
-# Plot Goal
-goal_endx, goal_endy = get_arrow_pose(goal_pose, arrow_length=0.3)
-pylab.arrow(goal_pose[0], goal_pose[1], goal_endx, goal_endy, width=0.05, color='green')
-
-
+# Start and Final poses
+plot_pose(start_pose, 'red')
+plot_pose(goal_pose, 'green')
 
 plt.show()
