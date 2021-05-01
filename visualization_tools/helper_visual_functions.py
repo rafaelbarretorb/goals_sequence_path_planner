@@ -4,7 +4,7 @@ import math
 import numpy as np
 from scipy import interpolate
 
-def get_arrow_pose(x, y, theta, arrow_length=0.25):
+def get_arrow_pose(theta, arrow_length=0.25):
     endx = arrow_length*math.cos(theta)
     endy = arrow_length*math.sin(theta)
 

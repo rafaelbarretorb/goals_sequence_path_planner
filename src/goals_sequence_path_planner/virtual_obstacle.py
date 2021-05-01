@@ -11,10 +11,10 @@ PI = np.pi
 # TODO the main method shall check if the random point is inside proibited area
 
 class VirtualObstacle:
-  def __init__(self, x0, y0, yaw, goal_tolerance, maneuver_radius, pose_status_goal=True):
-    self.x0 = x0
-    self.y0 = y0 
-    self.yaw = yaw
+  def __init__(self, pose, goal_tolerance, maneuver_radius, pose_status_goal=True):
+    self.x0 = pose[0]
+    self.y0 = pose[1]
+    self.yaw = pose[2]
     self.goal_tolerance = goal_tolerance
     self.maneuver_radius = maneuver_radius
     self.pose_status_goal = pose_status_goal

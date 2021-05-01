@@ -11,8 +11,8 @@ from virtual_obstacle import VirtualObstacle
 class RRTStarSmartDualTree:
 	""" Class for RRT*-Smart Dual Tree Path Planning. """
 	def __init__(self,
-	             start_point,
-				 goal_point,
+	             start_pose,
+				 goal_pose,
 				 grid,
 				 min_num_nodes,
                  max_num_nodes,
@@ -25,8 +25,8 @@ class RRTStarSmartDualTree:
 				 x_dim,
 				 y_dim,
 				 virtual_obstacles=False):
-		self.start_point = start_point
-		self.goal_point = goal_point
+		self.start_pose = start_pose
+		self.goal_pose = goal_pose
 		self.grid = grid
 		self.max_num_nodes = max_num_nodes
 		self.min_num_nodes = min_num_nodes
@@ -40,10 +40,13 @@ class RRTStarSmartDualTree:
 		self.y_dim = y_dim
 		self.virtual_obstacles = virtual_obstacles
 
+		self.start_point = [start_pose[0], start_pose[1]]
+		self.goal_point = [goal_pose[0], goal_pose[1]]
+
 		# Tree starting at start point
 		self.start_tree = Tree(is_start_tree=True,
-							   start_point=self.start_point,
-							   start_point_other_tree=self.goal_point,
+							   start_pose=self.start_pose,
+							   start_pose_other_tree=self.goal_pose,
 							   grid=self.grid,
 							   goal_tolerance=self.goal_tolerance,
 							   epsilon=self.epsilon,
@@ -57,8 +60,8 @@ class RRTStarSmartDualTree:
 
 		# Tree starting at goal point
 		self.goal_tree = Tree(is_start_tree=False,
-							  start_point=self.goal_point,
-							  start_point_other_tree=self.start_point,
+							  start_pose=self.goal_pose,
+							  start_pose_other_tree=self.start_pose,
 							  grid=self.grid,
 							  goal_tolerance=self.goal_tolerance,
 							  epsilon=self.epsilon,

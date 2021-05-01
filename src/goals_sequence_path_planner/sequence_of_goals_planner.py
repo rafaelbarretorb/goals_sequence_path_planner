@@ -1,15 +1,9 @@
 #!/usr/bin/env python
 
-from scipy import interpolate
-
 from rrt_star_smart_dual_tree import RRTStarSmartDualTree
-from helper_functions import dist, aim_to_point
+from helper_functions import distance, aim_to_point
 
-import numpy as np
-import matplotlib.pyplot as plt
-import pylab
 import math
-
 import copy
 
 PI = math.pi
@@ -100,8 +94,8 @@ class SequenceOfGoalsPlanner:
         for i in range(len(points) - 1):
 			path = list()
 			# make RRT* Path Planning
-			planner = RRTStarSmartDualTree(start_point=points[i],
-											goal_point=points[i+1],
+			planner = RRTStarSmartDualTree(start_pose=points[i],
+											goal_pose=points[i+1],
 											grid=self.global_map,
 											min_num_nodes=self.min_num_nodes,
 											max_num_nodes=self.max_num_nodes,
@@ -131,8 +125,8 @@ class SequenceOfGoalsPlanner:
 			else:
 				path = list()
 				# TODO Limit time (max 10 secs example) 
-				planner = RRTStarSmartDualTree(start_point=points[i],
-												goal_point=points[i+1],
+				planner = RRTStarSmartDualTree(start_pose=points[i],
+												goal_pose=points[i+1],
 												grid=self.global_map,
 												min_num_nodes=self.min_num_nodes,
 												max_num_nodes=self.max_num_nodes,

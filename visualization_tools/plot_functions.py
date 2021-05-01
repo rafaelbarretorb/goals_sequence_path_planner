@@ -35,18 +35,21 @@ def plot_dod_doa(paths, dod_angles, doa_angles):
 
         # DOA
         doa = doa_angles[i]
-        plot_pose(x, y, doa, 'red')
+        plot_pose([x, y, doa], 'red')
 
         # DOD
         dod = dod_angles[i]
-        plot_pose(x, y, dod, 'black')
+        plot_pose([x, y, dod], 'black')
 
 def make_new_world():
     grid_map, graph = make_world()
     return grid_map
 
-def plot_pose(x, y, yaw, color):
-    endx, endy = get_arrow_pose(x, y, yaw, arrow_length=0.3)
+def plot_pose(pose, color):
+    x = pose[0]
+    y = pose[1]
+    yaw = pose[2]
+    endx, endy = get_arrow_pose(yaw, arrow_length=0.3)
     pylab.arrow(x, y, endx, endy, width=arrow_width, color=color)
 
 def plot_goals_position(paths):

@@ -46,7 +46,7 @@ def main():
 	# goals_list = [G4, G1]
 
 	# TEST 3
-	goals_list = [G1, G3, G4]
+	# goals_list = [G1, G3, G4]
 
 	# TEST 4
 	# goals_list = [G1, G2, G3, G4]
@@ -71,19 +71,19 @@ def main():
 	grid_map = make_new_world()
 
 	planner = SequenceOfGoalsPlanner(start_pose=start_pose,
-										final_pose=final_pose,
-										goals_list=goals_list,
-										global_map=grid_map,
-										min_num_nodes=min_num_nodes,
-										max_num_nodes=max_num_nodes,
-										goal_tolerance=goal_tolerance,
-										epsilon=epsilon,
-										optimization_radius=optimization_radius,
-										obs_resolution=obs_resolution,
-										biasing_radius=biasing_radius,
-										biasing_ratio=biasing_ratio,
-										x_dim=x_dim,
-										y_dim=y_dim)
+									 final_pose=final_pose,
+									 goals_list=goals_list,
+									 global_map=grid_map,
+									 min_num_nodes=min_num_nodes,
+									 max_num_nodes=max_num_nodes,
+									 goal_tolerance=goal_tolerance,
+									 epsilon=epsilon,
+									 optimization_radius=optimization_radius,
+									 obs_resolution=obs_resolution,
+									 biasing_radius=biasing_radius,
+									 biasing_ratio=biasing_ratio,
+									 x_dim=x_dim,
+									 y_dim=y_dim)
 
 	paths = planner.get_usual_paths()
 	dod_angles = planner.get_dod_angles()
@@ -97,11 +97,9 @@ def main():
 	plot_paths(paths)
 	plot_dod_doa(paths, dod_angles, doa_angles)
 
-	# Start Pose
-	plot_pose(start_pose[0], start_pose[1], start_pose[2], 'purple')
-
-	# Final Pose
-	plot_pose(paths[-1][-1][0], paths[-1][-1][1], final_pose[2], 'orange')
+	# Start and Final poses
+	plot_pose(start_pose, 'purple')
+	plot_pose(final_pose, 'orange')
 
 	# plot_goals_position(paths)
 
@@ -118,83 +116,38 @@ def main():
 	# print "Optimized Paths: " + str(opt_paths)
 	plot_paths(opt_paths)
 
-	# Start Pose
-	plot_pose(start_pose[0], start_pose[1], start_pose[2], 'purple')
-
-	# Final Pose
-	plot_pose(opt_paths[-1][-1][0], opt_paths[-1][-1][1], final_pose[2], 'orange')
+	# Start and Final poses
+	plot_pose(start_pose, 'purple')
+	plot_pose(final_pose, 'orange')
 
     # --------------------
     # ----- FIGURE 3 -----
     # --------------------
 
-    # make_new_world()
+	make_new_world()
 
-    # print "Length opt_paths: " + str(len(opt_paths))
-    # for i in range(len(opt_paths)):
-    # # if the path size is zero than use the usual path
-    # if len(opt_paths[i]) == 0:
-    #     opt_paths[i] = paths[i][:]
-    #     if i > 0:
-    #     opt_paths[i][0] = opt_paths[i-1][-1]
+	print "Length opt_paths: " + str(len(opt_paths))
+	for i in range(len(opt_paths)):
+		# if the path size is zero than use the usual path
+		if len(opt_paths[i]) == 0:
+			opt_paths[i] = paths[i][:]
+			if i > 0:
+				opt_paths[i][0] = opt_paths[i-1][-1]
 
-    # print "Length opt_paths[" + str(i) + "]: " + str(len(opt_paths[i]))
-    # data = list()
-    # for j in range(len(opt_paths[i])):
-    #     data.append([opt_paths[i][j][0], opt_paths[i][j][1]])
+		print "Length opt_paths[" + str(i) + "]: " + str(len(opt_paths[i]))
+		data = list()
+		for j in range(len(opt_paths[i])):
+			data.append([opt_paths[i][j][0], opt_paths[i][j][1]])
 
-    # data = np.array(data)
-    # p = bspline(data, n=100, degree=3)
-    # x, y = p.T
-    # plt.plot(x, y, color=colors[i])
+		data = np.array(data)
+		p = bspline(data, n=100, degree=3)
+		x, y = p.T
+		plt.plot(x, y, color=colors[i])
 
-# def plot_paths(paths, scatter=False):
-#     for i in range(len(paths)):
-#         x = list()
-#         y = list()
-#         for j in range(len(paths[i])):
-#             x.append(paths[i][j][0])
-#             y.append(paths[i][j][1])
-        
-#         # Plot
-#         plt.plot(x,y, color=colors[i])
+	# Start and Final poses
+	plot_pose(start_pose, 'purple')
+	plot_pose(final_pose, 'orange')
 
-#         # Scatter
-#         if scatter:
-#             plt.scatter(x, y, color=colors[i])
-
-# def plot_dod_doa(paths, dod_angles, doa_angles):
-#     for i in range(len(dod_angles)):
-#         x = paths[i][-1][0]
-#         y = paths[i][-1][1]
-
-#         # DOA
-#         doa = doa_angles[i]
-#         plot_pose(x, y, doa, 'red')
-
-#         # DOD
-#         dod = dod_angles[i]
-#         plot_pose(x, y, dod, 'black')
-
-# def make_new_world():
-#     grid_map, graph = make_world()
-#     return grid_map
-
-# def plot_pose(x, y, yaw, color):
-#     endx, endy = get_arrow_pose(x, y, yaw, arrow_length=0.3)
-#     pylab.arrow(x, y, endx, endy, width=arrow_width, color=color)
-
-# def plot_goals_position(paths):
-#     x = list()
-#     y = list()
-#     for i in range(len(paths) - 1):
-#         x.append(paths[i][-1][0])
-#         y.append(paths[i][-1][1])
-
-#     plt.scatter(x, y, color='black')
-
-# def plot_virtual_obs(goals):
-#     pass
 
 if __name__ == "__main__":
     main()
