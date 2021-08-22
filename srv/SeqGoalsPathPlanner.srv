@@ -1,5 +1,7 @@
+# Service Request
 Node start_point
 NodeArray sequence_of_goals
 Node final_point
 ---
+# Service Response
 PathArray paths

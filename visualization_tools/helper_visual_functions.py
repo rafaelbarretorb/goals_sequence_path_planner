@@ -20,7 +20,7 @@ def make_spline_curve(path, max_distance, tolerance, insert_cv=True):
 		data = insert_control_points(data, max_distance, tolerance)
 	spline_curve = bspline(data, n=100, degree=3)
 
-	return spline_curve
+	return spline_curve, data
   
 def bspline(cv, n=100, degree=3, periodic=False):
 	""" Calculate n samples on a bspline

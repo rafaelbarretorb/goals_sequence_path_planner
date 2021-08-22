@@ -11,7 +11,7 @@ from nav_msgs.msg import OccupancyGrid
 
 from tf.transformations import euler_from_quaternion
 
-from goals_sequence_path_planner import GlobalPathPlanner
+from goals_sequence_path_planner import SequenceOfGoalsPlanner
 
 from goals_sequence_path_planner.msg import PathArray, Node
 
@@ -49,12 +49,31 @@ class SeqGoalsPlannerServer:
                  "Goal %d: ( x , y, yaw) = ( %f , %f , %f )" % (
                      i, goals_list[i][0], goals_list[i][1], math.degrees(goals_list[i][2])))
 
-        planner = GlobalPathPlanner(start_pose=start_pose,
-                                    final_pose=final_pose,
-                                    goals_list=goals_list,
-                                    global_map=self.global_costmap,
-                                    x_dim=10.0,
-                                    y_dim=10.0)
+        min_num_nodes = 1000
+        max_num_nodes = 1500
+        goal_tolerance = 0.2
+        epsilon = 0.5
+        optimization_radius = 1.0
+        obs_resolution = 0.05
+        biasing_radius = 1.0
+        biasing_ratio = 20
+        x_dim = 15.0
+        y_dim = 15.0
+
+        planner = SequenceOfGoalsPlanner(start_pose=start_pose,
+                                         final_pose=final_pose,
+                                         goals_list=goals_list,
+                                         global_map=self.global_costmap,
+                                         min_num_nodes=min_num_nodes,
+                                         max_num_nodes=max_num_nodes,
+                                         goal_tolerance=goal_tolerance,
+                                         epsilon=epsilon,
+                                         optimization_radius=optimization_radius,
+                                         obs_resolution=obs_resolution,
+                                         biasing_radius=biasing_radius,
+                                         biasing_ratio=biasing_ratio,
+                                         x_dim=x_dim,
+                                         y_dim=y_dim)
 
         paths = planner.get_optimized_paths()
 
