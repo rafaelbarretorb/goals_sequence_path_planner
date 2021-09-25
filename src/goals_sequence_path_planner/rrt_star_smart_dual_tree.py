@@ -1,10 +1,7 @@
 #!/usr/bin/env python
 
-import pygame
 import sys
-
 from tree import Tree
-
 from virtual_obstacle import VirtualObstacle
 
 
